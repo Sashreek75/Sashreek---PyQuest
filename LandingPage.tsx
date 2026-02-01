@@ -226,8 +226,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onInitialize }) => {
                  <p className="text-xl text-slate-400 font-medium">Every line of Python you write is audited against tier-1 industry standards. Not just syntax, but mathematical logic.</p>
                  <div className="p-8 bg-[#010208] border border-slate-800 rounded-[40px] font-mono text-sm space-y-4">
                     <div className="text-indigo-500 uppercase text-[10px] font-black tracking-[0.4em] mb-2">Analyzing Tensor Operations...</div>
-                    <div className="text-slate-600">>>> weight_update = weight - (learning_rate * gradient)</div>
-                    <div className="text-slate-600">>>> loss_convergence = np.linalg.norm(weight_update)</div>
+                    <div className="text-slate-600">{'>>>'} weight_update = weight - (learning_rate * gradient)</div>
+                    <div className="text-slate-600">{'>>>'} loss_convergence = np.linalg.norm(weight_update)</div>
                     <div className="h-1 bg-slate-900 rounded-full overflow-hidden mt-4">
                        <div className="h-full bg-indigo-500 w-[72%] shimmer"></div>
                     </div>
@@ -317,7 +317,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onInitialize }) => {
                     <div className="mt-2">@app.route(<span className="text-emerald-400">'/predict'</span>, methods=[<span className="text-emerald-400">'POST'</span>])</div>
                     <div><span className="text-violet-400">def</span> predict():</div>
                     <div className="pl-6">result = model.forward(request.json[<span className="text-emerald-400">'data'</span>])</div>
-                    <div className="pl-6">return {<span className="text-emerald-400">'output'</span>: result}</div>
+                    <div className="pl-6">return {'{'}<span className="text-emerald-400">'output'</span>: result{'}'}</div>
                   </div>
                 )}
               </div>
