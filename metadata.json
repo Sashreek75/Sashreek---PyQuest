@@ -1,0 +1,8 @@
+{
+  "name": "Copy of PyQuest: Mastery-Based ML Learning",
+  "description": "A Python-first machine learning platform where builders master ML through hands-on quests, code experimentation, and AI-guided challenges.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
