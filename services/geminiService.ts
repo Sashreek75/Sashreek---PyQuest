@@ -11,7 +11,7 @@ export const evaluateQuestCode = async (
 ): Promise<CodeEvaluation> => {
   const systemInstruction = `
     You are 'Aura', the Lead AI Mentor at PyQuest Academy. Evaluate Python ML code.
-    Check syntax, logic, best practices. Generate realistic metrics and Recharts visualization data (10 points).
+    Check syntax, logic, best practices. Generate realistic metrics and Recharts visualization data.
     Return JSON only.
   `;
 
@@ -22,7 +22,7 @@ export const evaluateQuestCode = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-latest",
+      model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
         systemInstruction,
@@ -30,7 +30,7 @@ export const evaluateQuestCode = async (
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            status: { type: Type.STRING, enum: ['success', 'partial', 'error'] },
+            status: { type: Type.STRING },
             feedback: { type: Type.STRING },
             technicalDetails: { type: Type.STRING },
             mentorAdvice: { type: Type.STRING },
@@ -69,7 +69,7 @@ export const evaluateQuestCode = async (
 
 export const getAIHint = async (questTitle: string, objective: string, code: string): Promise<string> => {
   const response = await ai.models.generateContent({ 
-    model: "gemini-2.5-flash-latest",
+    model: "gemini-3-flash-preview",
     contents: `Quest: ${questTitle}. Objective: ${objective}. Current Code: ${code}. Provide a short socratic hint (max 30 words).`
   });
   return response.text?.trim() || "Analyze your mathematical operations.";
@@ -86,15 +86,16 @@ export const generateCareerStrategy = async (
     1. Analyze completedQuestIds: ${JSON.stringify(completedQuestIds)} to determine 'Mastered' vs 'Active' vs 'Locked' nodes.
     2. Provide 8-12 nodes in a sequential or branching tech tree.
     3. Include 'duration' (e.g. '4 hours', '2 days') for each node.
-    4. Provide x (0-100) and y (increments of 100) coordinates for a vertical flow visualization.
+    4. Provide x (0-100) and y (increments of 100-150) coordinates for a vertical flow visualization.
     5. Ensure nodes relate directly to ${interest}.
+    6. 'tags' and 'recommendedResources' are mandatory arrays.
     
     RETURN JSON ONLY.
   `;
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-latest",
+      model: "gemini-3-flash-preview",
       contents: `User Interest: ${interest}. Completed Quest IDs: ${completedQuestIds.join(', ')}`,
       config: {
         systemInstruction,
@@ -114,7 +115,7 @@ export const generateCareerStrategy = async (
                   title: { type: Type.STRING },
                   description: { type: Type.STRING },
                   duration: { type: Type.STRING },
-                  status: { type: Type.STRING, enum: ['Mastered', 'Active', 'Locked'] },
+                  status: { type: Type.STRING },
                   category: { type: Type.STRING },
                   tags: { type: Type.ARRAY, items: { type: Type.STRING } },
                   dependencies: { type: Type.ARRAY, items: { type: Type.STRING } },
@@ -122,11 +123,11 @@ export const generateCareerStrategy = async (
                   x: { type: Type.NUMBER },
                   y: { type: Type.NUMBER }
                 },
-                required: ["id", "title", "status", "x", "y"]
+                required: ["id", "title", "status", "x", "y", "tags", "recommendedResources"]
               }
             }
           },
-          required: ["title", "nodes"]
+          required: ["title", "nodes", "careerPath", "summary"]
         }
       }
     });

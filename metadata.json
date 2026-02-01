@@ -1,6 +1,6 @@
 {
-  "name": "PyQuest - The AI Revolution Training Ground",
-  "description": "Master Python and Machine Learning through project-based quests. Build your technical depth, solve challenges, and don't get replaced by the AI revolution.",
+  "name": "PyQuest",
+  "description": "The AI Revolution Training Ground. Master Python and Machine Learning through 16 professional quests.",
   "requestFramePermissions": [
     "camera",
     "microphone"

@@ -53,6 +53,7 @@ export interface User {
   interests: string;
   goal: string;
   avatarSeed: string;
+  provider: 'google' | 'github' | 'email';
 }
 
 export interface SkillNode {
@@ -79,14 +80,14 @@ export interface RoadmapNode {
   id: string;
   title: string;
   description: string;
-  duration: string; // e.g. "2-3 weeks"
+  duration: string;
   status: 'Mastered' | 'Active' | 'Locked';
   category: string;
   tags: string[];
-  dependencies: string[]; // IDs of required nodes
+  dependencies: string[];
   recommendedResources: string[];
-  x: number; // Horizontal position (0-100)
-  y: number; // Vertical position (sequential steps)
+  x: number;
+  y: number;
 }
 
 export interface RoadmapData {
@@ -101,8 +102,8 @@ export interface Progress {
   completedQuests: string[];
   passedQuizzes: string[];
   experience: number;
-  careerGoal?: string; // Legacy text summary
-  roadmapData?: RoadmapData; // New structured data
+  careerGoal?: string;
+  roadmapData?: RoadmapData;
   currentStreak: number;
   lastActiveDate?: string;
   achievements: Achievement[];

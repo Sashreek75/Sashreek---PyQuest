@@ -1,16 +1,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { QUESTS, INITIAL_ACHIEVEMENTS } from './constants';
-import { Quest, Progress, CodeEvaluation, UserStats, User, RoadmapData } from './types';
+import { Quest, Progress, CodeEvaluation, UserStats, User, RoadmapData, Achievement } from './types';
 import QuestCard from './components/QuestCard';
 import Visualizer from './components/Visualizer';
 import QuizOverlay from './components/QuizOverlay';
 import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
 import CareerArchitect from './components/CareerArchitect';
+import Notification from './components/Notification';
+import Auth from './components/Auth';
 import { evaluateQuestCode, getAIHint, generateCareerStrategy } from './services/geminiService';
 
-type View = 'Landing' | 'Dashboard' | 'Academy' | 'Quest' | 'CareerPath' | 'Profile';
+type View = 'Landing' | 'Auth' | 'Dashboard' | 'Academy' | 'Quest' | 'CareerPath' | 'Profile';
 
 const App: React.FC = () => {
   const [view, setView] = useState<View>('Landing');
@@ -19,21 +21,20 @@ const App: React.FC = () => {
   const [currentQuest, setCurrentQuest] = useState<Quest | null>(null);
   const [showQuiz, setShowQuiz] = useState(false);
   
-  // High Fidelity Simulation State
+  const [notification, setNotification] = useState<{ title: string; message: string; icon: string } | null>(null);
+  
   const [code, setCode] = useState('');
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [evaluation, setEvaluation] = useState<CodeEvaluation | null>(null);
   const [aiHint, setAiHint] = useState<string | null>(null);
   
-  // Career Strategist State
   const [interestInput, setInterestInput] = useState('');
   const [isGeneratingPath, setIsGeneratingPath] = useState(false);
 
-  // Auto-Persist Session
   useEffect(() => {
-    const savedSession = localStorage.getItem('pyquest_session_v5');
-    if (savedSession) {
-      const u = JSON.parse(savedSession);
+    const savedUser = localStorage.getItem('pyquest_active_session');
+    if (savedUser) {
+      const u = JSON.parse(savedUser);
       setUser(u);
       loadUserProgress(u.id);
       setView('Dashboard');
@@ -41,7 +42,7 @@ const App: React.FC = () => {
   }, []);
 
   const loadUserProgress = (userId: string) => {
-    const savedProgress = localStorage.getItem(`pyquest_progress_v5_${userId}`);
+    const savedProgress = localStorage.getItem(`pyquest_progress_v6_${userId}`);
     if (savedProgress) {
       setProgress(JSON.parse(savedProgress));
     } else {
@@ -61,36 +62,29 @@ const App: React.FC = () => {
   };
 
   const saveProgress = (userId: string, p: Progress) => {
-    localStorage.setItem(`pyquest_progress_v5_${userId}`, JSON.stringify(p));
+    localStorage.setItem(`pyquest_progress_v6_${userId}`, JSON.stringify(p));
   };
 
-  const handleInitialize = () => {
-    const seed = Math.random().toString(36).substr(2, 9);
-    const newUser: User = {
-      id: 'PQ-' + seed.toUpperCase(),
-      username: 'Pioneer_' + seed.substr(0, 4).toUpperCase(),
-      email: 'active@session.py',
-      createdAt: new Date().toISOString(),
-      interests: '',
-      goal: '',
-      avatarSeed: seed
-    };
-    setUser(newUser);
-    localStorage.setItem('pyquest_session_v5', JSON.stringify(newUser));
-    loadUserProgress(newUser.id);
+  const handleAuth = (authenticatedUser: User) => {
+    setUser(authenticatedUser);
+    localStorage.setItem('pyquest_active_session', JSON.stringify(authenticatedUser));
+    loadUserProgress(authenticatedUser.id);
     setView('Dashboard');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setNotification({
+      title: "Terminal Linked",
+      message: `Welcome, ${authenticatedUser.username}. Your professional roadmap is ready.`,
+      icon: "🔑"
+    });
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('pyquest_session_v5');
+    localStorage.removeItem('pyquest_active_session');
     setUser(null);
     setProgress(null);
     setView('Landing');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Central Stats Engine
   const stats: UserStats = progress ? {
     level: Math.floor(progress.experience / 1000) + 1,
     xp: progress.experience % 1000,
@@ -140,13 +134,22 @@ const App: React.FC = () => {
         experience: progress.experience + currentQuest.xpReward
       };
       
-      // Update achievements
-      if (updatedProgress.completedQuests.length === 3 && !updatedProgress.achievements.find(a => a.id === 'math_wizard')) {
-        updatedProgress.achievements.push(INITIAL_ACHIEVEMENTS[2]);
-      }
-      if (currentQuest.id === 'trans-1' && !updatedProgress.achievements.find(a => a.id === 'transformer_master')) {
-        updatedProgress.achievements.push(INITIAL_ACHIEVEMENTS[4]);
-      }
+      const triggerAchievement = (id: string) => {
+        const ach = INITIAL_ACHIEVEMENTS.find(a => a.id === id);
+        if (ach && !updatedProgress.achievements.find(a => a.id === id)) {
+          updatedProgress.achievements.push(ach);
+          setNotification({
+            title: ach.title,
+            message: ach.description,
+            icon: ach.icon
+          });
+        }
+      };
+
+      if (updatedProgress.completedQuests.length === 1) triggerAchievement('first_step');
+      if (updatedProgress.completedQuests.length === 3) triggerAchievement('math_wizard');
+      if (currentQuest.id === 'trans-1') triggerAchievement('transformer_master');
+      if (updatedProgress.experience >= 5000) triggerAchievement('ai_architect');
 
       setProgress(updatedProgress);
       saveProgress(user.id, updatedProgress);
@@ -164,6 +167,11 @@ const App: React.FC = () => {
       const updatedProgress: Progress = { ...progress, roadmapData };
       setProgress(updatedProgress);
       saveProgress(user.id, updatedProgress);
+      setNotification({
+        title: "Roadmap Architected",
+        message: `High-fidelity tech tree generated for ${interestInput}.`,
+        icon: "🗺️"
+      });
     } catch (err) {
       console.error("Failed to generate roadmap", err);
     } finally {
@@ -172,7 +180,11 @@ const App: React.FC = () => {
   };
 
   if (view === 'Landing') {
-    return <LandingPage onInitialize={handleInitialize} />;
+    return <LandingPage onInitialize={() => setView('Auth')} />;
+  }
+
+  if (view === 'Auth') {
+    return <Auth onAuth={handleAuth} onBack={() => setView('Landing')} />;
   }
 
   const renderSimpleNav = () => (
@@ -223,7 +235,7 @@ const App: React.FC = () => {
             user={user} 
             progress={progress} 
             stats={stats} 
-            onNavigate={(v) => setView(v)} 
+            onNavigate={(v) => setView(v as View)} 
             onSelectQuest={handleQuestSelect}
             onLogout={handleLogout}
           />
@@ -407,13 +419,28 @@ const App: React.FC = () => {
                 </div>
                 <div className="flex-1 space-y-4">
                   <h2 className="text-6xl font-black text-white tracking-tighter leading-none uppercase">{user.username}</h2>
-                  <p className="text-slate-500 font-bold uppercase tracking-[0.5em] text-lg">{user.id}</p>
+                  <div className="space-y-2">
+                    <p className="text-slate-500 font-bold uppercase tracking-[0.5em] text-lg">{user.id}</p>
+                    <div className="flex items-center gap-2 text-indigo-400 font-black text-[10px] uppercase tracking-widest">
+                      <span>Auth Provider:</span>
+                      <span className="bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">{user.provider}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         )}
       </main>
+
+      {notification && (
+        <Notification 
+          title={notification.title} 
+          message={notification.message} 
+          icon={notification.icon} 
+          onClose={() => setNotification(null)} 
+        />
+      )}
     </div>
   );
 };
