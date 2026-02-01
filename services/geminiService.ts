@@ -2,7 +2,8 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { CodeEvaluation, RoadmapData } from "../types";
 
-// Always initialize the Gemini client with process.env.API_KEY as per security and architectural guidelines
+// Always use process.env.API_KEY to initialize the GoogleGenAI client instance.
+// Assume this variable is pre-configured and accessible in the execution context.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const evaluateQuestCode = async (
@@ -22,7 +23,7 @@ export const evaluateQuestCode = async (
   `;
 
   try {
-    // Using gemini-3-pro-preview for advanced coding evaluation and reasoning tasks
+    // Directly call generateContent on the models property of the ai instance.
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
       contents: prompt,
@@ -63,6 +64,7 @@ export const evaluateQuestCode = async (
         }
       }
     });
+    // Use the .text property to access the generated content as per guidelines.
     return JSON.parse(response.text || '{}') as CodeEvaluation;
   } catch (error) {
     return { status: 'error', feedback: "Audit kernel failure.", technicalDetails: String(error), suggestedResources: [] };
@@ -70,11 +72,12 @@ export const evaluateQuestCode = async (
 };
 
 export const getAIHint = async (questTitle: string, objective: string, code: string): Promise<string> => {
-  // Using gemini-3-pro-preview for context-aware Socratic hints based on code input
+  // Directly call generateContent with model name and prompt.
   const response = await ai.models.generateContent({ 
     model: "gemini-3-pro-preview",
     contents: `Quest: ${questTitle}. Objective: ${objective}. Current Code: ${code}. Provide a short socratic hint (max 30 words).`
   });
+  // Access generated text via the .text property.
   return response.text?.trim() || "Analyze your mathematical operations.";
 };
 
@@ -83,21 +86,18 @@ export const generateCareerStrategy = async (
   completedQuestIds: string[]
 ): Promise<RoadmapData> => {
   const systemInstruction = `
-    You are the 'PyQuest Strategic Architect'. Generate a visual tech roadmap (roadmap.sh style) for a user interested in ${interest}.
+    You are the 'PyQuest Strategic Architect'. Generate a visual tech roadmap for a user interested in ${interest}.
     
     RULES:
     1. Analyze completedQuestIds: ${JSON.stringify(completedQuestIds)} to determine 'Mastered' vs 'Active' vs 'Locked' nodes.
     2. Provide 8-12 nodes in a sequential or branching tech tree.
-    3. Include 'duration' (e.g. '4 hours', '2 days') for each node.
-    4. Provide x (0-100) and y (increments of 100-150) coordinates for a vertical flow visualization.
-    5. Ensure nodes relate directly to ${interest}.
-    6. 'tags' and 'recommendedResources' are mandatory arrays.
-    
-    RETURN JSON ONLY.
+    3. Include 'duration' for each node.
+    4. Provide x (0-100) and y (increments of 100-150) coordinates.
+    5. Return JSON ONLY.
   `;
 
   try {
-    // Using gemini-3-pro-preview for complex strategic roadmap generation and reasoning
+    // Generate content using a specified model and the provided configuration.
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
       contents: `User Interest: ${interest}. Completed Quest IDs: ${completedQuestIds.join(', ')}`,
@@ -135,6 +135,7 @@ export const generateCareerStrategy = async (
         }
       }
     });
+    // Extract generated JSON string using response.text.
     return JSON.parse(response.text || '{}') as RoadmapData;
   } catch (error) {
     console.error("Roadmap generation failed:", error);
