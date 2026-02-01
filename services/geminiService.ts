@@ -1,47 +1,28 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { CodeEvaluation } from "../types";
+import { CodeEvaluation, RoadmapData } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-/**
- * Evaluates the user's Python code using the Gemini model.
- * Provides logical validation, technical feedback, and simulated performance metrics.
- */
 export const evaluateQuestCode = async (
   questTitle: string,
   objective: string,
   userCode: string
 ): Promise<CodeEvaluation> => {
   const systemInstruction = `
-    You are a world-class Machine Learning Scientist and Python Mentor at PyQuest Academy.
-    Your goal is to evaluate student code submissions for technical accuracy, efficiency, and adherence to ML best practices.
+    You are 'Aura', the Lead AI Mentor at PyQuest Academy. Evaluate Python ML code.
+    Check syntax, logic, best practices. Generate realistic metrics and Recharts visualization data (10 points).
+    Return JSON only.
   `;
 
   const prompt = `
-    QUEST CONTEXT:
-    Title: "${questTitle}"
-    Objective: "${objective}"
-    
-    STUDENT SUBMISSION:
-    \`\`\`python
-    ${userCode}
-    \`\`\`
-    
-    EVALUATION REQUIREMENTS:
-    1. LINTING: Identify if the code runs logically based on Python syntax.
-    2. OBJECTIVE CHECK: Does the code fulfill the specific quest objective?
-    3. FEEDBACK: Provide 2-3 sentences of professional, encouraging technical critique.
-    4. METRICS: If the quest involves data/ML, simulate performance metrics (accuracy 0-1, loss 0-2).
-    5. VISUALIZATION: Provide an array of 5 data points for a Recharts LineChart showing a simulated training curve.
-    6. ADVICE: One sentence of "Mentor Wisdom" for their next steps.
-
-    RESPOND ONLY IN JSON.
+    QUEST: ${questTitle} | OBJECTIVE: ${objective}
+    CODE: \`\`\`python\n${userCode}\n\`\`\`
   `;
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-2.5-flash-latest",
       contents: prompt,
       config: {
         systemInstruction,
@@ -51,13 +32,16 @@ export const evaluateQuestCode = async (
           properties: {
             status: { type: Type.STRING, enum: ['success', 'partial', 'error'] },
             feedback: { type: Type.STRING },
+            technicalDetails: { type: Type.STRING },
             mentorAdvice: { type: Type.STRING },
+            suggestedResources: { type: Type.ARRAY, items: { type: Type.STRING } },
             metrics: {
               type: Type.OBJECT,
               properties: {
                 accuracy: { type: Type.NUMBER },
                 loss: { type: Type.NUMBER },
-                precision: { type: Type.NUMBER }
+                precision: { type: Type.NUMBER },
+                f1_score: { type: Type.NUMBER }
               }
             },
             visualizationData: {
@@ -72,73 +56,83 @@ export const evaluateQuestCode = async (
                 }
               }
             }
-          }
+          },
+          required: ["status", "feedback", "technicalDetails"]
         }
       }
     });
-
-    const parsed = JSON.parse(response.text || '{}');
-    return parsed as CodeEvaluation;
+    return JSON.parse(response.text || '{}') as CodeEvaluation;
   } catch (error) {
-    console.error("Evaluation error:", error);
-    return { 
-      status: 'error', 
-      feedback: "The simulation environment encountered an error. Please verify your logic and try again." 
-    };
+    return { status: 'error', feedback: "Audit kernel failure.", technicalDetails: String(error), suggestedResources: [] };
   }
 };
 
-/**
- * Fetches a contextual hint from the AI mentor.
- */
 export const getAIHint = async (questTitle: string, objective: string, code: string): Promise<string> => {
-  const prompt = `
-    Student is working on "${questTitle}". 
-    Objective: ${objective}
-    Current Code: ${code}
-    
-    Provide a subtle, 20-word conceptual hint that doesn't reveal the code solution but points them in the right direction.
-  `;
-  
-  try {
-    const response = await ai.models.generateContent({ 
-      model: "gemini-3-flash-preview", 
-      contents: prompt 
-    });
-    return response.text?.trim() || "Think about the data transformation process.";
-  } catch {
-    return "Consider reviewing the core Python documentation for this module.";
-  }
+  const response = await ai.models.generateContent({ 
+    model: "gemini-2.5-flash-latest",
+    contents: `Quest: ${questTitle}. Objective: ${objective}. Current Code: ${code}. Provide a short socratic hint (max 30 words).`
+  });
+  return response.text?.trim() || "Analyze your mathematical operations.";
 };
 
-/**
- * Generates a high-fidelity career strategy based on user interests and progress.
- */
-export const generateCareerStrategy = async (interests: string, completedQuests: string[]): Promise<string> => {
-  const prompt = `
-    Generate a detailed, multi-phase technical career roadmap for a PyQuest student.
-    USER INTERESTS: ${interests}
-    COMPLETED MODULES: ${completedQuests.join(', ')}
+export const generateCareerStrategy = async (
+  interest: string,
+  completedQuestIds: string[]
+): Promise<RoadmapData> => {
+  const systemInstruction = `
+    You are the 'PyQuest Strategic Architect'. Generate a visual tech roadmap (roadmap.sh style) for a user interested in ${interest}.
     
-    Structure:
-    1. CURRENT POSITIONING: Analysis of their skill set.
-    2. THE GROWTH PATH: Next 3 critical technologies to master.
-    3. THE PROJECT LAB: 2 ambitious project ideas tailored to their interests.
-    4. INDUSTRY FORECAST: Where their skills will be most valuable in 2026.
+    RULES:
+    1. Analyze completedQuestIds: ${JSON.stringify(completedQuestIds)} to determine 'Mastered' vs 'Active' vs 'Locked' nodes.
+    2. Provide 8-12 nodes in a sequential or branching tech tree.
+    3. Include 'duration' (e.g. '4 hours', '2 days') for each node.
+    4. Provide x (0-100) and y (increments of 100) coordinates for a vertical flow visualization.
+    5. Ensure nodes relate directly to ${interest}.
     
-    Use a professional, inspiring tone. Use Markdown.
+    RETURN JSON ONLY.
   `;
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3-pro-preview",
-      contents: prompt,
+      model: "gemini-2.5-flash-latest",
+      contents: `User Interest: ${interest}. Completed Quest IDs: ${completedQuestIds.join(', ')}`,
       config: {
-        thinkingConfig: { thinkingBudget: 16000 }
+        systemInstruction,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            title: { type: Type.STRING },
+            careerPath: { type: Type.STRING },
+            summary: { type: Type.STRING },
+            nodes: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  id: { type: Type.STRING },
+                  title: { type: Type.STRING },
+                  description: { type: Type.STRING },
+                  duration: { type: Type.STRING },
+                  status: { type: Type.STRING, enum: ['Mastered', 'Active', 'Locked'] },
+                  category: { type: Type.STRING },
+                  tags: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  dependencies: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  recommendedResources: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  x: { type: Type.NUMBER },
+                  y: { type: Type.NUMBER }
+                },
+                required: ["id", "title", "status", "x", "y"]
+              }
+            }
+          },
+          required: ["title", "nodes"]
+        }
       }
     });
-    return response.text || "Strategy generation timed out.";
-  } catch {
-    return "Career advisory services are currently under maintenance. Please try again later.";
+    return JSON.parse(response.text || '{}') as RoadmapData;
+  } catch (error) {
+    console.error("Roadmap generation failed:", error);
+    throw error;
   }
 };

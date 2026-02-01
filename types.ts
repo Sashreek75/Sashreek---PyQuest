@@ -1,6 +1,15 @@
 
 export type Difficulty = 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert';
-export type QuestCategory = 'Python Basics' | 'Intermediate Python' | 'Data Science' | 'Machine Learning' | 'Advanced AI' | 'Neural Architectures';
+
+export type QuestCategory = 
+  | 'Python Foundations' 
+  | 'Mathematical Logic' 
+  | 'Data Engineering' 
+  | 'Classical ML' 
+  | 'Deep Learning' 
+  | 'Neural Architectures'
+  | 'LLM & Transformers'
+  | 'MLOps & Deployment';
 
 export interface QuizQuestion {
   question: string;
@@ -14,6 +23,7 @@ export interface Achievement {
   title: string;
   description: string;
   icon: string;
+  rarity: 'Common' | 'Rare' | 'Epic' | 'Legendary';
   unlockedAt?: string;
 }
 
@@ -31,9 +41,9 @@ export interface Quest {
   estimatedMinutes: number;
   xpReward: number;
   quiz: QuizQuestion[];
+  technicalPrerequisites: string[];
 }
 
-// Added password field to solve property existence errors in components/Auth.tsx
 export interface User {
   id: string;
   username: string;
@@ -42,6 +52,14 @@ export interface User {
   createdAt: string;
   interests: string;
   goal: string;
+  avatarSeed: string;
+}
+
+export interface SkillNode {
+  name: string;
+  level: number;
+  xp: number;
+  color: string;
 }
 
 export interface UserStats {
@@ -53,7 +71,29 @@ export interface UserStats {
   badges: string[];
   rank: string;
   totalHours: number;
-  skillPoints: Record<string, number>;
+  skillMatrix: SkillNode[];
+  globalPercentile: number;
+}
+
+export interface RoadmapNode {
+  id: string;
+  title: string;
+  description: string;
+  duration: string; // e.g. "2-3 weeks"
+  status: 'Mastered' | 'Active' | 'Locked';
+  category: string;
+  tags: string[];
+  dependencies: string[]; // IDs of required nodes
+  recommendedResources: string[];
+  x: number; // Horizontal position (0-100)
+  y: number; // Vertical position (sequential steps)
+}
+
+export interface RoadmapData {
+  title: string;
+  careerPath: string;
+  summary: string;
+  nodes: RoadmapNode[];
 }
 
 export interface Progress {
@@ -61,21 +101,26 @@ export interface Progress {
   completedQuests: string[];
   passedQuizzes: string[];
   experience: number;
-  careerGoal?: string;
+  careerGoal?: string; // Legacy text summary
+  roadmapData?: RoadmapData; // New structured data
   currentStreak: number;
   lastActiveDate?: string;
   achievements: Achievement[];
+  dailyLoginCount: number;
 }
 
 export interface CodeEvaluation {
   status: 'success' | 'partial' | 'error';
   feedback: string;
+  technicalDetails: string;
   metrics?: {
     accuracy?: number;
     loss?: number;
     precision?: number;
     recall?: number;
+    f1_score?: number;
   };
   visualizationData?: any[];
   mentorAdvice?: string;
+  suggestedResources: string[];
 }

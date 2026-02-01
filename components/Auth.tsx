@@ -55,6 +55,7 @@ const Auth: React.FC<AuthProps> = ({ onAuth, onBack }) => {
         return;
       }
       
+      // Added missing avatarSeed to comply with the User interface
       const newUser: User = {
         id: Math.random().toString(36).substr(2, 9),
         username: cleanUsername || 'Pioneer',
@@ -62,7 +63,8 @@ const Auth: React.FC<AuthProps> = ({ onAuth, onBack }) => {
         password: cleanPassword,
         createdAt: new Date().toISOString(),
         interests: '',
-        goal: ''
+        goal: '',
+        avatarSeed: Math.random().toString(36).substr(2, 9)
       };
       
       users.push(newUser);

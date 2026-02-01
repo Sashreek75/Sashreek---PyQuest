@@ -1,48 +1,104 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PyQuest - Project-Based ML Learning</title>
+    <title>PyQuest - The AI Revolution Training Ground</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-deep: #010208;
+            --accent-primary: #4f46e5;
+            --accent-secondary: #7c3aed;
+        }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #020617;
+            background-color: var(--bg-deep);
             color: #f8fafc;
             overflow-x: hidden;
+            scroll-behavior: smooth;
         }
         .code-font {
             font-family: 'Fira Code', monospace;
         }
-        .bg-grid {
-            background-image: radial-gradient(circle at 1px 1px, #1e293b 1px, transparent 0);
-            background-size: 40px 40px;
-        }
-        .animate-float {
-            animation: float 6s ease-in-out infinite;
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
+        
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 10px;
         }
         ::-webkit-scrollbar-track {
-            background: #020617;
+            background: #010208;
         }
         ::-webkit-scrollbar-thumb {
-            background: #1e293b;
-            border-radius: 4px;
+            background: linear-gradient(to bottom, #1e293b, #4f46e5);
+            border-radius: 20px;
+            border: 2px solid #010208;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #334155;
+            background: #6366f1;
+        }
+
+        /* Neural Mesh Background */
+        .mesh-gradient {
+            background-color: #010208;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,0.15) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,0.08) 0, transparent 50%),
+                radial-gradient(at 0% 100%, hsla(225,39%,30%,0.1) 0, transparent 50%),
+                radial-gradient(at 100% 100%, hsla(339,49%,30%,0.1) 0, transparent 50%);
+        }
+
+        /* Advanced Keyframes */
+        @keyframes neural-drift {
+            0%, 100% { opacity: 0.2; transform: scale(1) translate(0, 0); }
+            50% { opacity: 0.4; transform: scale(1.1) translate(20px, -20px); }
+        }
+        .animate-neural {
+            animation: neural-drift 12s ease-in-out infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
+        }
+        .glitch-hover:hover {
+            animation: glitch 0.3s linear infinite;
+        }
+
+        @keyframes float-complex {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-30px) rotate(2deg); }
+            66% { transform: translateY(-15px) rotate(-2deg); }
+        }
+        .animate-float-pro {
+            animation: float-complex 10s ease-in-out infinite;
+        }
+
+        .text-reveal-mask {
+            mask-image: linear-gradient(to bottom, white 50%, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, white 50%, transparent);
+        }
+
+        /* Glassmorphism utility */
+        .glass {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Gradient Text */
+        .text-gradient {
+            background: linear-gradient(to r, #6366f1, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
     </style>
 <script type="importmap">
@@ -57,7 +113,7 @@
 }
 </script>
 </head>
-<body class="bg-grid">
+<body class="mesh-gradient">
     <div id="root"></div>
 </body>
 </html>
