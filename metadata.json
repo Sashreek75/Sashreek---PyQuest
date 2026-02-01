@@ -1,6 +1,6 @@
 {
-  "name": "Copy of PyQuest: Mastery-Based ML Learning",
-  "description": "A Python-first machine learning platform where builders master ML through hands-on quests, code experimentation, and AI-guided challenges.",
+  "name": "PyQuest - The AI Revolution Training Ground",
+  "description": "Master Python and Machine Learning through project-based quests. Build your technical depth, solve challenges, and don't get replaced by the AI revolution.",
   "requestFramePermissions": [
     "camera",
     "microphone"

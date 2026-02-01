@@ -2,36 +2,41 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { CodeEvaluation } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
+/**
+ * Evaluates the user's Python code using the Gemini model.
+ * Provides logical validation, technical feedback, and simulated performance metrics.
+ */
 export const evaluateQuestCode = async (
   questTitle: string,
   objective: string,
   userCode: string
 ): Promise<CodeEvaluation> => {
+  const systemInstruction = `
+    You are a world-class Machine Learning Scientist and Python Mentor at PyQuest Academy.
+    Your goal is to evaluate student code submissions for technical accuracy, efficiency, and adherence to ML best practices.
+  `;
+
   const prompt = `
-    You are an expert Machine Learning Instructor for PyQuest.
-    Review the following Python code for the quest: "${questTitle}".
-    Objective: ${objective}
+    QUEST CONTEXT:
+    Title: "${questTitle}"
+    Objective: "${objective}"
     
-    User Code:
+    STUDENT SUBMISSION:
     \`\`\`python
     ${userCode}
     \`\`\`
     
-    Tasks:
-    1. Check if the code logically solves the objective using the requested tools (NumPy, Pandas, etc.).
-    2. Provide constructive feedback.
-    3. Simulate some metrics (accuracy, loss) if applicable.
-    4. Generate mock visualization data for Recharts (array of objects with 'epoch', 'loss', 'accuracy').
-    
-    Response MUST be a JSON object matching this schema:
-    {
-      "status": "success" | "partial" | "error",
-      "feedback": "string",
-      "metrics": { "accuracy": number, "loss": number },
-      "visualizationData": [ { "epoch": number, "loss": number, "val_loss": number, "accuracy": number } ]
-    }
+    EVALUATION REQUIREMENTS:
+    1. LINTING: Identify if the code runs logically based on Python syntax.
+    2. OBJECTIVE CHECK: Does the code fulfill the specific quest objective?
+    3. FEEDBACK: Provide 2-3 sentences of professional, encouraging technical critique.
+    4. METRICS: If the quest involves data/ML, simulate performance metrics (accuracy 0-1, loss 0-2).
+    5. VISUALIZATION: Provide an array of 5 data points for a Recharts LineChart showing a simulated training curve.
+    6. ADVICE: One sentence of "Mentor Wisdom" for their next steps.
+
+    RESPOND ONLY IN JSON.
   `;
 
   try {
@@ -39,17 +44,20 @@ export const evaluateQuestCode = async (
       model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
+        systemInstruction,
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            status: { type: Type.STRING },
+            status: { type: Type.STRING, enum: ['success', 'partial', 'error'] },
             feedback: { type: Type.STRING },
+            mentorAdvice: { type: Type.STRING },
             metrics: {
               type: Type.OBJECT,
               properties: {
                 accuracy: { type: Type.NUMBER },
-                loss: { type: Type.NUMBER }
+                loss: { type: Type.NUMBER },
+                precision: { type: Type.NUMBER }
               }
             },
             visualizationData: {
@@ -69,40 +77,68 @@ export const evaluateQuestCode = async (
       }
     });
 
-    return JSON.parse(response.text || '{}') as CodeEvaluation;
+    const parsed = JSON.parse(response.text || '{}');
+    return parsed as CodeEvaluation;
   } catch (error) {
-    return { status: 'error', feedback: "Evaluation failed. Error: " + error };
+    console.error("Evaluation error:", error);
+    return { 
+      status: 'error', 
+      feedback: "The simulation environment encountered an error. Please verify your logic and try again." 
+    };
   }
 };
 
+/**
+ * Fetches a contextual hint from the AI mentor.
+ */
 export const getAIHint = async (questTitle: string, objective: string, code: string): Promise<string> => {
-  const prompt = `User is stuck on PyQuest: "${questTitle}". Objective: ${objective}. Code: ${code}. Give a 1-2 sentence conceptual hint.`;
+  const prompt = `
+    Student is working on "${questTitle}". 
+    Objective: ${objective}
+    Current Code: ${code}
+    
+    Provide a subtle, 20-word conceptual hint that doesn't reveal the code solution but points them in the right direction.
+  `;
+  
   try {
-    const response = await ai.models.generateContent({ model: "gemini-3-flash-preview", contents: prompt });
-    return response.text || "Keep trying!";
-  } catch { return "AI mentor offline."; }
+    const response = await ai.models.generateContent({ 
+      model: "gemini-3-flash-preview", 
+      contents: prompt 
+    });
+    return response.text?.trim() || "Think about the data transformation process.";
+  } catch {
+    return "Consider reviewing the core Python documentation for this module.";
+  }
 };
 
-export const generateCareerStrategy = async (interests: string, skills: string[]): Promise<string> => {
+/**
+ * Generates a high-fidelity career strategy based on user interests and progress.
+ */
+export const generateCareerStrategy = async (interests: string, completedQuests: string[]): Promise<string> => {
   const prompt = `
-    Create an ACHIEVABLE, REALISTIC STRATEGIC CAREER PLAN for a young learner (student/kid) who wants to pursue technology.
-    Interests: ${interests}
-    Current Python Skills: ${skills.join(', ')}
+    Generate a detailed, multi-phase technical career roadmap for a PyQuest student.
+    USER INTERESTS: ${interests}
+    COMPLETED MODULES: ${completedQuests.join(', ')}
     
-    The plan should be motivating, friendly, and broken into 3 phases:
-    1. The Near Future (Learning)
-    2. The Intermediate Phase (Building Projects)
-    3. The Professional Goal (Career Vision)
+    Structure:
+    1. CURRENT POSITIONING: Analysis of their skill set.
+    2. THE GROWTH PATH: Next 3 critical technologies to master.
+    3. THE PROJECT LAB: 2 ambitious project ideas tailored to their interests.
+    4. INDUSTRY FORECAST: Where their skills will be most valuable in 2026.
     
-    Format as Markdown. Keep it concise but inspiring.
+    Use a professional, inspiring tone. Use Markdown.
   `;
 
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
       contents: prompt,
-      config: { thinkingConfig: { thinkingBudget: 1000 } }
+      config: {
+        thinkingConfig: { thinkingBudget: 16000 }
+      }
     });
-    return response.text || "Failed to generate strategy.";
-  } catch { return "Career advisor unavailable."; }
+    return response.text || "Strategy generation timed out.";
+  } catch {
+    return "Career advisory services are currently under maintenance. Please try again later.";
+  }
 };

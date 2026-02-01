@@ -1,186 +1,106 @@
 
-import { Quest } from './types';
+import { Quest, Achievement } from './types';
+
+export const INITIAL_ACHIEVEMENTS: Achievement[] = [
+  { id: 'first_step', title: 'Hello World', description: 'Initialized your first session in PyQuest.', icon: '🚀' },
+  { id: 'streak_3', title: 'Triple Threat', description: 'Maintained a 3-day learning streak.', icon: '🔥' },
+  { id: 'math_wizard', title: 'NumPy Ninja', description: 'Solved your first matrix-based quest.', icon: '🥷' },
+  { id: 'ai_architect', title: 'Neural Architect', description: 'Built a multi-layer neural network from scratch.', icon: '🧠' }
+];
 
 export const QUESTS: Quest[] = [
-  // 1-4: Python Basics
   {
     id: 'py-1',
-    title: 'Variable Alchemy',
+    title: 'The Alchemy of Types',
     category: 'Python Basics',
     difficulty: 'Beginner',
-    description: 'Master the building blocks of Python: variables and data types.',
-    objective: 'Create a script that stores personal data and performs a simple calculation.',
-    startingCode: `# TODO: Define variables for name, age, and a boolean for status\n# Calculate birth year based on current_year = 2024`,
-    solutionHint: 'Use age = 20 and current_year - age.',
-    topics: ['Variables', 'Types', 'Arithmetic'],
-    quiz: [{ question: 'What is the type of "3.14"?', options: ['int', 'float', 'string', 'bool'], correctAnswer: 1 }]
+    description: 'Data is the lifeblood of AI. Master the fundamental primitives.',
+    longDescription: 'In this module, we transition from simple strings to complex numeric types. Understanding how Python handles memory and precision is critical when preparing tensors for deep learning models. We will explore the nuances of integer versus float representations and f-string interpolation for model logging.',
+    objective: 'Create an intelligent profile system that calculates a user\'s biological age in seconds and formats it as a scientific string for audit logging.',
+    startingCode: `name = "Researcher"\nage_years = 20\n# TODO: Calculate age in seconds (approx 365.25 days/year to account for leap years)\nage_seconds = 0\nprint(f"Subject: {name} | Lifecycle: {age_seconds}s")`,
+    solutionHint: 'Multiply age_years by 365.25 * 24 * 60 * 60 and round the result.',
+    topics: ['Variables', 'Integers', 'Scientific Strings', 'Precision'],
+    estimatedMinutes: 10,
+    xpReward: 250,
+    quiz: [
+      { 
+        question: 'What character starts a comment in Python?', 
+        options: ['//', '/*', '#', '--'], 
+        correctAnswer: 2,
+        explanation: 'The hash symbol (#) is used for single-line comments in Python.'
+      },
+      {
+        question: 'How do you convert a string "10" to an integer?',
+        options: ['to_int("10")', 'int("10")', 'Integer.parse("10")', 'cast<int>("10")'],
+        correctAnswer: 1,
+        explanation: 'The built-in int() function performs type conversion to integers.'
+      }
+    ]
   },
   {
     id: 'py-2',
-    title: 'Control Flow Maze',
+    title: 'Logic Gates: The Sentinel',
     category: 'Python Basics',
     difficulty: 'Beginner',
-    description: 'Learn to make decisions with if-statements.',
-    objective: 'Build a simple login logic handler.',
-    startingCode: `password = "secret123"\ninput_pw = "secret123"\n# TODO: Check if input_pw matches password`,
-    solutionHint: 'Use == for comparison.',
-    topics: ['Conditionals', 'Logic'],
+    description: 'Machines only "think" through decisions. Master boolean flow control.',
+    longDescription: 'Conditional logic is the precursor to decision trees. In this module, we implement a multi-condition security gate. You will learn to use "and", "or", and "not" operators to control the execution path of your program based on real-time input flags.',
+    objective: 'Write a security sentinel script that permits entry only if the subject has a valid clearance ID AND is above age 18.',
+    startingCode: `clearance = True\nage = 25\n# TODO: Implement the gate logic using conditional statements\naccess_granted = False`,
+    solutionHint: 'Use an if-else statement: "if clearance and age >= 18: access_granted = True".',
+    topics: ['Conditionals', 'Compound Logic', 'Boolean Flags'],
+    estimatedMinutes: 15,
+    xpReward: 300,
+    quiz: [
+      { 
+        question: 'Which operator checks if two values are equal?', 
+        options: ['=', '==', '===', 'eq'], 
+        correctAnswer: 1,
+        explanation: '== is the equality operator; = is for assignment.'
+      }
+    ]
   },
   {
-    id: 'py-3',
-    title: 'Looping Through Data',
-    category: 'Python Basics',
-    difficulty: 'Beginner',
-    description: 'Automate repetitive tasks using for and while loops.',
-    objective: 'Sum all numbers in a list using a loop.',
-    startingCode: `nums = [10, 20, 30, 40, 50]\ntotal = 0\n# TODO: Iterate and sum`,
-    solutionHint: 'Use "for num in nums:".',
-    topics: ['Loops', 'Lists'],
-  },
-  {
-    id: 'py-4',
-    title: 'Function Factory',
-    category: 'Python Basics',
-    difficulty: 'Beginner',
-    description: 'Encapsulate logic into reusable functions.',
-    objective: 'Write a function that calculates the area of a circle.',
-    startingCode: `import math\n\ndef get_area(radius):\n    # TODO: Implement formula\n    pass`,
-    solutionHint: 'math.pi * radius**2',
-    topics: ['Functions', 'Modules'],
-  },
-  // 5-8: Intermediate Python
-  {
-    id: 'py-5',
-    title: 'List Comprehensions',
-    category: 'Intermediate Python',
-    difficulty: 'Intermediate',
-    description: 'Write concise code with comprehensions.',
-    objective: 'Filter a list of numbers to keep only even ones.',
-    startingCode: `data = range(100)\n# TODO: Use list comprehension`,
-    solutionHint: '[x for x in data if x % 2 == 0]',
-    topics: ['Functional Programming'],
-  },
-  {
-    id: 'py-6',
-    title: 'OOP: The Hero Class',
-    category: 'Intermediate Python',
-    difficulty: 'Intermediate',
-    description: 'Understand Classes and Objects.',
-    objective: 'Create a Character class with health and attack methods.',
-    startingCode: `class Character:\n    # TODO: Implement __init__ and attack`,
-    solutionHint: 'Use "self" to refer to instance variables.',
-    topics: ['OOP', 'Classes'],
-  },
-  {
-    id: 'py-7',
-    title: 'Exception Handling',
-    category: 'Intermediate Python',
-    difficulty: 'Intermediate',
-    description: 'Learn to handle errors gracefully.',
-    objective: 'Safe division function that avoids ZeroDivisionError.',
-    startingCode: `def safe_div(a, b):\n    # TODO: try-except block`,
-    solutionHint: 'try: ... except ZeroDivisionError: ...',
-    topics: ['Exceptions', 'Debugging'],
-  },
-  {
-    id: 'py-8',
-    title: 'File I/O Secrets',
-    category: 'Intermediate Python',
-    difficulty: 'Intermediate',
-    description: 'Reading and writing data to files.',
-    objective: 'Read a CSV-style string and parse it.',
-    startingCode: `csv_data = "name,score\\nAlice,95\\nBob,88"\n# TODO: Parse this into a list of dicts`,
-    solutionHint: 'split("\\n") then split(",")',
-    topics: ['IO', 'Parsing'],
-  },
-  // 9-12: Data Science
-  {
-    id: 'ds-1',
-    title: 'NumPy Foundations',
+    id: 'ds-9',
+    title: 'The NumPy Array Matrix',
     category: 'Data Science',
     difficulty: 'Intermediate',
-    description: 'Master multi-dimensional arrays.',
-    objective: 'Normalize a 2D array of pixel values.',
-    startingCode: `import numpy as np\nimg = np.random.randint(0, 255, (28, 28))\n# TODO: Scale to 0-1 range`,
-    solutionHint: 'Divide by 255.0',
-    topics: ['NumPy', 'Arrays'],
+    description: 'Vanilla Python is too slow for AI. Harness the power of vectorized operations.',
+    longDescription: 'NumPy (Numerical Python) is the foundation of the Python ML stack. By moving operations from Python loops to C-level vectorized calls, we achieve massive speedups. This quest introduces ndarrays, shape manipulation, and broadcasting.',
+    objective: 'Create a 5x5 matrix of zeros and change the central value to 1.0 to simulate an activation peak.',
+    startingCode: `import numpy as np\n# TODO: Create a 5x5 array of zeros using np.zeros\n# and set the element at index [2,2] to 1.0\nmatrix = None`,
+    solutionHint: 'mat = np.zeros((5,5)); mat[2,2] = 1.0',
+    topics: ['NumPy', 'Matrix Manipulation', 'Vectorization'],
+    estimatedMinutes: 20,
+    xpReward: 450,
+    quiz: [
+      { 
+        question: 'What is the standard import alias for NumPy?', 
+        options: ['ny', 'num', 'np', 'npy'], 
+        correctAnswer: 2,
+        explanation: 'Convention dictates using "import numpy as np" for brevity and readability.'
+      }
+    ]
   },
   {
-    id: 'ds-2',
-    title: 'Pandas Wrangling',
-    category: 'Data Science',
-    difficulty: 'Intermediate',
-    description: 'DataFrames and manipulation.',
-    objective: 'Find the average score for each department.',
-    startingCode: `import pandas as pd\ndf = pd.DataFrame({"dept": ["A", "B", "A"], "score": [90, 80, 70]})\n# TODO: Group by and mean`,
-    solutionHint: 'df.groupby("dept").mean()',
-    topics: ['Pandas', 'Aggregation'],
-  },
-  {
-    id: 'ds-3',
-    title: 'Matplotlib Visuals',
-    category: 'Data Science',
-    difficulty: 'Intermediate',
-    description: 'Plotting trends and distributions.',
-    objective: 'Plot a sine wave.',
-    startingCode: `import matplotlib.pyplot as plt\nimport numpy as np\nx = np.linspace(0, 10, 100)\n# TODO: Plot x vs sin(x)`,
-    solutionHint: 'plt.plot(x, np.sin(x))',
-    topics: ['Visualization'],
-  },
-  {
-    id: 'ds-4',
-    title: 'The Cleaning Lab',
-    category: 'Data Science',
-    difficulty: 'Advanced',
-    description: 'Real-world data cleaning pipeline.',
-    objective: 'Impute missing values and remove outliers.',
-    startingCode: `import pandas as pd\n# TODO: Handle NaNs in df`,
-    solutionHint: 'df.fillna() or df.dropna()',
-    topics: ['Preprocessing'],
-  },
-  // 13-16: ML & AI
-  {
-    id: 'ml-1',
-    title: 'Linear Regression',
-    category: 'Machine Learning',
-    difficulty: 'Advanced',
-    description: 'Predict numerical values.',
-    objective: 'Train a basic regressor on housing data.',
-    startingCode: `from sklearn.linear_model import LinearRegression\n# TODO: Fit and Predict`,
-    solutionHint: 'model.fit(X, y)',
-    topics: ['Scikit-learn', 'Regression'],
-  },
-  {
-    id: 'ml-2',
-    title: 'Clustering Chaos',
-    category: 'Machine Learning',
-    difficulty: 'Advanced',
-    description: 'Find patterns in unlabeled data.',
-    objective: 'Implement K-Means clustering.',
-    startingCode: `from sklearn.cluster import KMeans\n# TODO: Cluster the data points`,
-    solutionHint: 'n_clusters=3',
-    topics: ['Unsupervised'],
-  },
-  {
-    id: 'ml-3',
-    title: 'Neural Network Spark',
+    id: 'ml-15',
+    title: 'Neural Architecture: Activation Layers',
     category: 'Advanced AI',
     difficulty: 'Advanced',
-    description: 'The start of Deep Learning.',
-    objective: 'Create a Perceptron to solve XOR.',
-    startingCode: `import numpy as np\n# TODO: Simple MLP logic`,
-    solutionHint: 'Use weights and a step function.',
-    topics: ['Deep Learning', 'Neural Networks'],
-  },
-  {
-    id: 'ml-4',
-    title: 'The Final Frontier',
-    category: 'Advanced AI',
-    difficulty: 'Advanced',
-    description: 'Deploying your first pipeline.',
-    objective: 'Build an end-to-end MLOps pipeline.',
-    startingCode: `from sklearn.pipeline import Pipeline\n# TODO: Bundle Scaler and Model`,
-    solutionHint: 'Pipeline([("scaler", StandardScaler()), ("clf", SVC())])',
-    topics: ['MLOps', 'Pipelines'],
+    description: 'Understand how layers of neurons process information via non-linear mapping.',
+    longDescription: 'Deep learning relies on non-linearity. Without activation functions like ReLU, a neural network is just a series of linear transformations, which could be collapsed into a single layer. Here, we build the mathematical skeleton of a hidden neuron.',
+    objective: 'Implement the mathematical logic of a single hidden layer with a ReLU (Rectified Linear Unit) activation function.',
+    startingCode: `import numpy as np\ndef relu(x): \n    # TODO: Implement max(0, x)\n    pass\n\n# Inputs, Weight, Bias\nx = 1.5\nw = 0.8\nb = -0.2\n\n# TODO: Calculate layer output: relu(x * w + b)\noutput = 0`,
+    solutionHint: 'y = relu(input * weight + bias)',
+    topics: ['Activation Functions', 'Neural Layers', 'ReLU', 'Forward Pass'],
+    estimatedMinutes: 30,
+    xpReward: 600,
+    quiz: [
+      { 
+        question: 'What does ReLU stand for?', 
+        options: ['Reduced Linear Unit', 'Rectified Linear Unit', 'Real Linear Unit', 'Regular Linear Unit'], 
+        correctAnswer: 1,
+        explanation: 'Rectified Linear Unit is the standard activation function for many deep learning architectures.'
+      }
+    ]
   }
 ];
