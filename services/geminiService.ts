@@ -2,6 +2,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { CodeEvaluation, RoadmapData } from "../types";
 
+// Always initialize the Gemini client with process.env.API_KEY as per security and architectural guidelines
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const evaluateQuestCode = async (
@@ -21,8 +22,9 @@ export const evaluateQuestCode = async (
   `;
 
   try {
+    // Using gemini-3-pro-preview for advanced coding evaluation and reasoning tasks
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-3-pro-preview",
       contents: prompt,
       config: {
         systemInstruction,
@@ -68,8 +70,9 @@ export const evaluateQuestCode = async (
 };
 
 export const getAIHint = async (questTitle: string, objective: string, code: string): Promise<string> => {
+  // Using gemini-3-pro-preview for context-aware Socratic hints based on code input
   const response = await ai.models.generateContent({ 
-    model: "gemini-3-flash-preview",
+    model: "gemini-3-pro-preview",
     contents: `Quest: ${questTitle}. Objective: ${objective}. Current Code: ${code}. Provide a short socratic hint (max 30 words).`
   });
   return response.text?.trim() || "Analyze your mathematical operations.";
@@ -94,8 +97,9 @@ export const generateCareerStrategy = async (
   `;
 
   try {
+    // Using gemini-3-pro-preview for complex strategic roadmap generation and reasoning
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-3-pro-preview",
       contents: `User Interest: ${interest}. Completed Quest IDs: ${completedQuestIds.join(', ')}`,
       config: {
         systemInstruction,
