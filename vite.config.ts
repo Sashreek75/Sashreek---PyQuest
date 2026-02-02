@@ -8,12 +8,6 @@ export default defineConfig({
     host: '0.0.0.0',
   },
   plugins: [react()],
-  define: {
-    // Vite does not polyfill Node globals like 'process' by default.
-    // This definition prevents ReferenceErrors when accessing process.env.
-    'process.env': '({})',
-    'process': '({ env: {} })'
-  },
   resolve: {
     alias: {
       '@': path.resolve('.'),
