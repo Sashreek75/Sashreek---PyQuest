@@ -1,9 +1,7 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { CodeEvaluation, RoadmapData } from "../types";
 
-// Always use process.env.API_KEY to initialize the GoogleGenAI client instance.
-// Assume this variable is pre-configured and accessible in the execution context.
+// Initialize the Google GenAI client using the required API key from process.env.API_KEY as per the library guidelines.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const evaluateQuestCode = async (
@@ -23,7 +21,6 @@ export const evaluateQuestCode = async (
   `;
 
   try {
-    // Directly call generateContent on the models property of the ai instance.
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
       contents: prompt,
@@ -64,7 +61,7 @@ export const evaluateQuestCode = async (
         }
       }
     });
-    // Use the .text property to access the generated content as per guidelines.
+    // Accessing text content via the .text property on the response object.
     return JSON.parse(response.text || '{}') as CodeEvaluation;
   } catch (error) {
     return { status: 'error', feedback: "Audit kernel failure.", technicalDetails: String(error), suggestedResources: [] };
@@ -72,12 +69,12 @@ export const evaluateQuestCode = async (
 };
 
 export const getAIHint = async (questTitle: string, objective: string, code: string): Promise<string> => {
-  // Directly call generateContent with model name and prompt.
+  // Using gemini-3-flash-preview for simple text tasks like generating hints.
   const response = await ai.models.generateContent({ 
-    model: "gemini-3-pro-preview",
+    model: "gemini-3-flash-preview",
     contents: `Quest: ${questTitle}. Objective: ${objective}. Current Code: ${code}. Provide a short socratic hint (max 30 words).`
   });
-  // Access generated text via the .text property.
+  // Accessing text content via the .text property.
   return response.text?.trim() || "Analyze your mathematical operations.";
 };
 
@@ -97,7 +94,6 @@ export const generateCareerStrategy = async (
   `;
 
   try {
-    // Generate content using a specified model and the provided configuration.
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
       contents: `User Interest: ${interest}. Completed Quest IDs: ${completedQuestIds.join(', ')}`,
@@ -135,7 +131,7 @@ export const generateCareerStrategy = async (
         }
       }
     });
-    // Extract generated JSON string using response.text.
+    // Extracting text output via the .text property.
     return JSON.parse(response.text || '{}') as RoadmapData;
   } catch (error) {
     console.error("Roadmap generation failed:", error);
