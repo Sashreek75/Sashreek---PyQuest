@@ -66,9 +66,9 @@ export const evaluateQuestCode = async (
         }
       }
     });
-    // Guidelines specify using response.text property directly
     return JSON.parse(response.text || '{}') as CodeEvaluation;
   } catch (error) {
+    console.error("Evaluation failed:", error);
     return { 
       status: 'error', 
       feedback: "Audit kernel failure. Please check your network connection and API key configuration.", 
@@ -80,13 +80,11 @@ export const evaluateQuestCode = async (
 
 export const getAIHint = async (questTitle: string, objective: string, code: string): Promise<string> => {
   try {
-    // Creating a new instance right before the call as per recommended best practices for key management.
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({ 
       model: "gemini-3-flash-preview",
       contents: `Quest: ${questTitle}. Objective: ${objective}. Current Code: ${code}. Provide a short socratic hint (max 30 words).`
     });
-    // Accessing text via property as per Correct Method guidelines
     return response.text?.trim() || "Analyze your mathematical operations.";
   } catch (error) {
     console.error("Hint generation failed:", error);
@@ -110,7 +108,6 @@ export const generateCareerStrategy = async (
   `;
 
   try {
-    // Initializing Gemini client with process.env.API_KEY as required
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",

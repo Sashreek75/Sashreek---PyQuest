@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { QUESTS, INITIAL_ACHIEVEMENTS } from './constants';
 import { Quest, Progress, CodeEvaluation, UserStats, User, RoadmapData, Achievement } from './types';
@@ -120,6 +119,11 @@ const App: React.FC = () => {
       }
     } catch (err) {
       console.error("Critical Evaluation Failure:", err);
+      setNotification({
+        title: "Kernel Error",
+        message: "Failed to audit logic. Check API key status.",
+        icon: "🚨"
+      });
     } finally {
       setIsEvaluating(false);
     }
@@ -174,6 +178,11 @@ const App: React.FC = () => {
       });
     } catch (err) {
       console.error("Failed to generate roadmap", err);
+      setNotification({
+        title: "Strategy Failure",
+        message: "The roadmap architect is offline. Verify network/API credentials.",
+        icon: "⚠️"
+      });
     } finally {
       setIsGeneratingPath(false);
     }
