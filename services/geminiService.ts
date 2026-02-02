@@ -1,14 +1,19 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { CodeEvaluation, RoadmapData } from "../types";
 
-// Initialize the Google GenAI client using the required API key from process.env.API_KEY as per the library guidelines.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+/**
+ * Lead AI Mentor: Aura
+ * Lead Strategic Architect: PyQuest Strategic Architect
+ */
 
 export const evaluateQuestCode = async (
   questTitle: string,
   objective: string,
   userCode: string
 ): Promise<CodeEvaluation> => {
+  // Always use a new instance to ensure it uses the most up-to-date API key from the environment.
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  
   const systemInstruction = `
     You are 'Aura', the Lead AI Mentor at PyQuest Academy. Evaluate Python ML code.
     Check syntax, logic, best practices. Generate realistic metrics and Recharts visualization data.
@@ -61,21 +66,32 @@ export const evaluateQuestCode = async (
         }
       }
     });
-    // Accessing text content via the .text property on the response object.
+    // Guidelines specify using response.text property directly
     return JSON.parse(response.text || '{}') as CodeEvaluation;
   } catch (error) {
-    return { status: 'error', feedback: "Audit kernel failure.", technicalDetails: String(error), suggestedResources: [] };
+    return { 
+      status: 'error', 
+      feedback: "Audit kernel failure. Please check your network connection and API key configuration.", 
+      technicalDetails: String(error), 
+      suggestedResources: [] 
+    };
   }
 };
 
 export const getAIHint = async (questTitle: string, objective: string, code: string): Promise<string> => {
-  // Using gemini-3-flash-preview for simple text tasks like generating hints.
-  const response = await ai.models.generateContent({ 
-    model: "gemini-3-flash-preview",
-    contents: `Quest: ${questTitle}. Objective: ${objective}. Current Code: ${code}. Provide a short socratic hint (max 30 words).`
-  });
-  // Accessing text content via the .text property.
-  return response.text?.trim() || "Analyze your mathematical operations.";
+  try {
+    // Creating a new instance right before the call as per recommended best practices for key management.
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const response = await ai.models.generateContent({ 
+      model: "gemini-3-flash-preview",
+      contents: `Quest: ${questTitle}. Objective: ${objective}. Current Code: ${code}. Provide a short socratic hint (max 30 words).`
+    });
+    // Accessing text via property as per Correct Method guidelines
+    return response.text?.trim() || "Analyze your mathematical operations.";
+  } catch (error) {
+    console.error("Hint generation failed:", error);
+    return "The mentor is momentarily offline. Review your logic structure.";
+  }
 };
 
 export const generateCareerStrategy = async (
@@ -94,6 +110,8 @@ export const generateCareerStrategy = async (
   `;
 
   try {
+    // Initializing Gemini client with process.env.API_KEY as required
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
       contents: `User Interest: ${interest}. Completed Quest IDs: ${completedQuestIds.join(', ')}`,
@@ -131,7 +149,6 @@ export const generateCareerStrategy = async (
         }
       }
     });
-    // Extracting text output via the .text property.
     return JSON.parse(response.text || '{}') as RoadmapData;
   } catch (error) {
     console.error("Roadmap generation failed:", error);
