@@ -1,4 +1,3 @@
-
 import path from 'path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
@@ -9,9 +8,14 @@ export default defineConfig({
     host: '0.0.0.0',
   },
   plugins: [react()],
+  define: {
+    // Vite does not polyfill Node globals like 'process' by default.
+    // This definition prevents ReferenceErrors when accessing process.env.
+    'process.env': '({})',
+    'process': '({ env: {} })'
+  },
   resolve: {
     alias: {
-      // Fix: Use path.resolve('.') to define the project root alias, avoiding __dirname which is unavailable in standard ESM environments
       '@': path.resolve('.'),
     }
   }
