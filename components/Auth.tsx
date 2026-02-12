@@ -60,36 +60,41 @@ const Auth: React.FC<AuthProps> = ({ onAuth, onBack }) => {
   };
 
   const processAuth = () => {
-    if (activeTab === 'login') {
-      const user = db.login(email, password);
-      if (user) {
-        db.setSession(user);
-        onAuth(user);
+    try {
+      if (activeTab === 'login') {
+        const user = db.login(email, password);
+        if (user) {
+          db.setSession(user);
+          onAuth(user);
+        } else {
+          setError('Authorization Failed: Identity not found or key mismatch.');
+          setIsProcessing(false);
+        }
       } else {
-        setError('Authorization Failed: Identity not found or key mismatch.');
-        setIsProcessing(false);
-      }
-    } else {
-      const newUser: User = {
-        id: `PQ-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-        username: username.trim(),
-        email: email.trim().toLowerCase(),
-        password: password,
-        createdAt: new Date().toISOString(),
-        interests: '',
-        goal: '',
-        avatarSeed: Math.random().toString(36).substr(2, 9),
-        provider: 'email'
-      };
+        const newUser: User = {
+          id: `PQ-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+          username: username.trim(),
+          email: email.trim().toLowerCase(),
+          password: password,
+          createdAt: new Date().toISOString(),
+          interests: '',
+          goal: '',
+          avatarSeed: Math.random().toString(36).substr(2, 9),
+          provider: 'email'
+        };
 
-      const result = db.register(newUser);
-      if (result.success) {
-        db.setSession(newUser);
-        onAuth(newUser);
-      } else {
-        setError(result.error || 'Registration failed.');
-        setIsProcessing(false);
+        const result = db.register(newUser);
+        if (result.success) {
+          db.setSession(newUser);
+          onAuth(newUser);
+        } else {
+          setError(result.error || 'Registration failed.');
+          setIsProcessing(false);
+        }
       }
+    } catch (err) {
+      setError('Neural Kernel exception occurred. Please try again.');
+      setIsProcessing(false);
     }
   };
 

@@ -29,7 +29,6 @@ const App: React.FC = () => {
   const [loadingTask, setLoadingTask] = useState<{ message: string; sub: string } | null>(null);
   
   const [code, setCode] = useState('');
-  const [isEvaluating, setIsEvaluating] = useState(false);
   const [evaluation, setEvaluation] = useState<CodeEvaluation | null>(null);
   const [aiHint, setAiHint] = useState<string | null>(null);
   
@@ -37,6 +36,7 @@ const App: React.FC = () => {
   const [isGeneratingPath, setIsGeneratingPath] = useState(false);
 
   useEffect(() => {
+    // Check for active session on boot
     const activeUser = db.getSession();
     if (activeUser) {
       setUser(activeUser);
@@ -81,6 +81,7 @@ const App: React.FC = () => {
     setUser(null);
     setProgress(null);
     setView('Landing');
+    setIsAuraOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -165,6 +166,7 @@ const App: React.FC = () => {
       setNotification({ title: "Roadmap Architected", message: `High-fidelity tree generated.`, icon: "🗺️" });
     } catch (err) {
       console.error("Roadmap generation failed", err);
+      setNotification({ title: "Strategy Failure", message: "Neural synthesis interrupted.", icon: "⚠️" });
     } finally {
       setLoadingTask(null);
     }
@@ -203,7 +205,15 @@ const App: React.FC = () => {
       {view !== 'Dashboard' && renderSimpleNav()}
       <main className="w-full">
         {view === 'Dashboard' && user && progress && (
-          <Dashboard user={user} progress={progress} stats={stats} onNavigate={(v) => setView(v as View)} onSelectQuest={handleQuestSelect} onLogout={handleLogout} />
+          <Dashboard 
+            user={user} 
+            progress={progress} 
+            stats={stats} 
+            onNavigate={(v) => setView(v as View)} 
+            onSelectQuest={handleQuestSelect} 
+            onLogout={handleLogout}
+            onToggleAura={() => setIsAuraOpen(true)}
+          />
         )}
         {view === 'Academy' && (
           <div className="max-w-[1800px] mx-auto px-10 py-20 space-y-16">
@@ -233,7 +243,10 @@ const App: React.FC = () => {
                   className="flex-1 w-full p-12 bg-[#010208] text-indigo-100 font-mono text-xl focus:outline-none resize-none"
                 />
                 <div className="p-10 bg-slate-900/50 flex justify-between items-center">
-                  <button onClick={async () => setAiHint(await getAIHint(currentQuest.title, currentQuest.objective, code))} className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Request Hint</button>
+                  <div className="flex gap-4">
+                    <button onClick={async () => setAiHint(await getAIHint(currentQuest.title, currentQuest.objective, code))} className="text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest">Request Hint</button>
+                    <button onClick={() => setIsAuraOpen(true)} className="text-[10px] font-black text-indigo-500 hover:text-indigo-400 uppercase tracking-widest">Consult Aura</button>
+                  </div>
                   <button onClick={handleRunCode} className="px-10 py-4 bg-white text-black rounded-2xl font-black uppercase text-sm active:scale-95">Submit Logic</button>
                 </div>
               </div>
@@ -264,7 +277,8 @@ const App: React.FC = () => {
       {/* Global AI Hub Overlay */}
       <AuraHub 
         isOpen={isAuraOpen} 
-        onClose={() => setIsAuraOpen(!isAuraOpen)} 
+        onClose={() => setIsAuraOpen(false)} 
+        onOpen={() => setIsAuraOpen(true)}
         context={currentQuest ? `Current Quest: ${currentQuest.title}` : 'General Exploration'}
       />
 

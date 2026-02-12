@@ -12,9 +12,10 @@ interface DashboardProps {
   onNavigate: (view: 'Academy' | 'CareerPath' | 'Profile') => void;
   onSelectQuest: (quest: Quest) => void;
   onLogout: () => void;
+  onToggleAura: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ user, progress, stats, onNavigate, onSelectQuest, onLogout }) => {
+const Dashboard: React.FC<DashboardProps> = ({ user, progress, stats, onNavigate, onSelectQuest, onLogout, onToggleAura }) => {
   const [activeTab, setActiveTab] = useState('Overview');
 
   const getCategoryProgress = (category: string) => {
@@ -181,7 +182,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, progress, stats, onNavigate
                   <h3 className="text-xl font-black text-white uppercase tracking-tighter">Consult Aura</h3>
                   <p className="text-xs text-indigo-100 font-medium">Stuck on a neural tensor operation? Aura is active and ready to review your logic.</p>
                 </div>
-                <button className="w-full py-4 bg-white text-indigo-600 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl">Initiate Consultation</button>
+                <button onClick={onToggleAura} className="w-full py-4 bg-white text-indigo-600 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-indigo-50 transition-colors">Initiate Consultation</button>
               </div>
 
               <div className="p-10 rounded-[40px] bg-[#0b0e14] border border-white/5 space-y-12 shadow-2xl">

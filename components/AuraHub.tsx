@@ -9,11 +9,12 @@ interface Message {
 
 interface AuraHubProps {
   isOpen: boolean;
+  onOpen: () => void;
   onClose: () => void;
   context?: string;
 }
 
-const AuraHub: React.FC<AuraHubProps> = ({ isOpen, onClose, context }) => {
+const AuraHub: React.FC<AuraHubProps> = ({ isOpen, onOpen, onClose, context }) => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([
     { role: 'aura', text: "Hello, Architect. I am Aura. How can I assist your technical evolution today?" }
@@ -48,7 +49,7 @@ const AuraHub: React.FC<AuraHubProps> = ({ isOpen, onClose, context }) => {
 
   if (!isOpen) return (
     <button 
-      onClick={onClose}
+      onClick={onOpen}
       className="fixed bottom-10 right-10 w-20 h-20 bg-indigo-600 rounded-[24px] flex items-center justify-center text-white shadow-3xl hover:scale-110 active:scale-95 transition-all z-[400] group"
     >
       <div className="absolute -inset-2 bg-indigo-600/20 blur-xl rounded-full animate-pulse group-hover:bg-indigo-600/40"></div>
@@ -61,7 +62,8 @@ const AuraHub: React.FC<AuraHubProps> = ({ isOpen, onClose, context }) => {
 
   return (
     <div className="fixed inset-0 z-[450] flex items-end justify-end p-6 md:p-10 pointer-events-none">
-      <div className="w-full max-w-md h-[700px] bg-[#0b0e14]/90 backdrop-blur-3xl border border-white/5 rounded-[48px] shadow-3xl flex flex-col pointer-events-auto animate-in slide-in-from-bottom-10 duration-500">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-auto" onClick={onClose}></div>
+      <div className="w-full max-w-md h-[700px] bg-[#0b0e14]/90 backdrop-blur-3xl border border-white/5 rounded-[48px] shadow-3xl flex flex-col pointer-events-auto animate-in slide-in-from-bottom-10 duration-500 relative">
         <header className="p-8 border-b border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black text-white text-lg crt-flicker">A</div>
