@@ -173,6 +173,17 @@ const Dashboard: React.FC<DashboardProps> = ({ user, progress, stats, onNavigate
             </div>
 
             <div className="lg:col-span-4 space-y-10">
+              {/* Call to Aura Component */}
+              <div className="p-10 rounded-[40px] bg-indigo-600 border border-indigo-400 space-y-6 shadow-[0_0_50px_rgba(79,70,229,0.3)] group relative overflow-hidden">
+                <div className="absolute -inset-10 bg-white/10 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="text-white text-5xl">🧠</div>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-black text-white uppercase tracking-tighter">Consult Aura</h3>
+                  <p className="text-xs text-indigo-100 font-medium">Stuck on a neural tensor operation? Aura is active and ready to review your logic.</p>
+                </div>
+                <button className="w-full py-4 bg-white text-indigo-600 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl">Initiate Consultation</button>
+              </div>
+
               <div className="p-10 rounded-[40px] bg-[#0b0e14] border border-white/5 space-y-12 shadow-2xl">
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.4em] flex items-center gap-3">
                   <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
@@ -196,29 +207,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user, progress, stats, onNavigate
                 </div>
               </div>
 
-              <div className="p-10 rounded-[40px] bg-[#0b0e14] border border-white/5 space-y-10 shadow-2xl">
-                 <h3 className="text-xs font-black text-white uppercase tracking-[0.4em] flex items-center gap-3">
-                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
-                    Terminal Diagnostics
-                 </h3>
-                 <div className="space-y-6">
-                    {[
-                      { l: 'Percentile Rank', v: stats.globalPercentile.toFixed(1) + '%' },
-                      { l: 'Logical Accuracy', v: stats.accuracy.toFixed(1) + '%' },
-                      { l: 'Training Cycles', v: stats.totalHours + 'h' },
-                    ].map((row, i) => (
-                      <div key={i} className="flex justify-between items-baseline py-3 border-b border-white/5 last:border-0">
-                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">{row.l}</span>
-                        <span className="text-lg font-black text-white uppercase tracking-tighter">{row.v}</span>
-                      </div>
-                    ))}
-                 </div>
-              </div>
-
               <div className="grid grid-cols-2 gap-6">
                 <button 
                   onClick={() => onNavigate('CareerPath')}
-                  className="p-8 rounded-[32px] bg-indigo-600 hover:bg-indigo-500 transition-all text-center space-y-4 group shadow-3xl shadow-indigo-600/20 active:scale-95"
+                  className="p-8 rounded-[32px] bg-[#1a1c24] hover:bg-[#252834] transition-all text-center space-y-4 group border border-white/5 shadow-2xl active:scale-95"
                 >
                   <div className="text-3xl">🚀</div>
                   <div className="text-[10px] font-black text-white uppercase tracking-[0.4em]">Pathfinder</div>

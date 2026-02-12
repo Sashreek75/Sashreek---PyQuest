@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { CodeEvaluation, RoadmapData } from "../types";
 
@@ -11,7 +12,6 @@ export const evaluateQuestCode = async (
   objective: string,
   userCode: string
 ): Promise<CodeEvaluation> => {
-  // Always use a new instance to ensure it uses the most up-to-date API key from the environment.
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const systemInstruction = `
@@ -75,6 +75,29 @@ export const evaluateQuestCode = async (
       technicalDetails: String(error), 
       suggestedResources: [] 
     };
+  }
+};
+
+export const chatWithAura = async (message: string, context?: string): Promise<string> => {
+  try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const systemInstruction = `
+      You are Aura, the elite AI Mentor for PyQuest. You are technical, encouraging, and highly professional.
+      Your goal is to help students understand Python, Machine Learning, and Neural Networks.
+      Context of user's current activity: ${context || 'General Dashboard'}.
+      Always provide concise but deep technical answers. Use Markdown for code snippets.
+    `;
+    
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: message,
+      config: { systemInstruction }
+    });
+    
+    return response.text || "Neural connection weak. Please repeat transmission.";
+  } catch (error) {
+    console.error("Aura Chat Error:", error);
+    return "Kernel error. My logic processors are rebooting. Try again in a moment.";
   }
 };
 
