@@ -32,6 +32,8 @@ export interface UserPersonalization {
   ambition: string;
   proficiency: string;
   focus: string;
+  philosophies: string[];
+  targetHardware: string;
   aiDirective: string;
   summary: string;
 }
@@ -63,6 +65,7 @@ export interface User {
   goal: string;
   avatarSeed: string;
   provider: 'google' | 'github' | 'email';
+  rememberMe?: boolean;
 }
 
 export interface SkillNode {

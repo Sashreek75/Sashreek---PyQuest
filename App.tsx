@@ -34,13 +34,18 @@ const App: React.FC = () => {
   const [aiHint, setAiHint] = useState<string | null>(null);
   
   const [interestInput, setInterestInput] = useState('');
-  const [isGeneratingPath, setIsGeneratingPath] = useState(false);
 
   useEffect(() => {
     const activeUser = db.getSession();
     if (activeUser) {
       setUser(activeUser);
-      loadUserProgress(activeUser.id);
+      const savedProgress = db.getProgress(activeUser.id);
+      if (savedProgress) {
+        setProgress(savedProgress);
+        setView(savedProgress.personalization || savedProgress.completedQuests.length > 0 ? 'Dashboard' : 'Personalization');
+      } else {
+        loadUserProgress(activeUser.id);
+      }
     }
   }, []);
 
@@ -48,11 +53,7 @@ const App: React.FC = () => {
     const savedProgress = db.getProgress(userId);
     if (savedProgress) {
       setProgress(savedProgress);
-      if (!savedProgress.personalization) {
-        setView('Personalization');
-      } else {
-        setView('Dashboard');
-      }
+      setView(savedProgress.personalization || savedProgress.completedQuests.length > 0 ? 'Dashboard' : 'Personalization');
     } else {
       const initial: Progress = {
         userId,
@@ -74,22 +75,35 @@ const App: React.FC = () => {
     setUser(authenticatedUser);
     loadUserProgress(authenticatedUser.id);
     setNotification({
-      title: "Terminal Linked",
-      message: `Identity verified. Architect ${authenticatedUser.username} online.`,
+      title: "Terminal Synchronized",
+      message: `Identity confirmed. Architect ${authenticatedUser.username} online.`,
       icon: "🔑"
     });
   };
 
-  const handlePersonalizationComplete = (personalization: UserPersonalization) => {
+  const handlePersonalizationComplete = (personalization: UserPersonalization | null) => {
     if (!user || !progress) return;
-    const updatedProgress = { ...progress, personalization };
+    
+    // Handle skip or failed generation
+    const finalPersonalization = personalization || {
+      field: "General Intelligence",
+      ambition: "Expert Architect",
+      proficiency: "Neural Initiate",
+      focus: "Python Core",
+      aiDirective: "Master the fundamental laws of applied intelligence.",
+      summary: "Explore the repository and find your path within the architecture.",
+      philosophies: ["Discovery"],
+      targetHardware: "Universal"
+    };
+
+    const updatedProgress = { ...progress, personalization: finalPersonalization };
     setProgress(updatedProgress);
     db.saveProgress(user.id, updatedProgress);
     setView('Dashboard');
     setNotification({
-      title: "Neural Synapse Formed",
-      message: "Curriculum recalibrated to target objectives.",
-      icon: "🧠"
+      title: personalization ? "Synaptic Alignment" : "Access Granted",
+      message: personalization ? "Neural curriculum targeted to your ambition." : "Proceeding with standard orientation protocol.",
+      icon: personalization ? "🧠" : "🔓"
     });
   };
 
@@ -109,7 +123,7 @@ const App: React.FC = () => {
     accuracy: 80 + (progress.passedQuizzes.length * 1.2),
     streak: progress.currentStreak,
     badges: progress.achievements.map(a => a.title),
-    rank: progress.experience > 9000 ? 'Master Architect' : (progress.experience > 4500 ? 'Senior Engineer' : (progress.experience > 1500 ? 'Applied Specialist' : 'Neural Initiate')),
+    rank: progress.experience > 9000 ? 'Zenith Architect' : (progress.experience > 4500 ? 'Senior Neural Engineer' : (progress.experience > 1500 ? 'Applied Specialist' : 'Neural Initiate')),
     totalHours: Math.floor(progress.experience / 120) + 1,
     skillMatrix: [], 
     globalPercentile: Math.min(99.9, 15 + (progress.experience / 100))
@@ -126,7 +140,7 @@ const App: React.FC = () => {
 
   const handleRunCode = async () => {
     if (!currentQuest) return;
-    setLoadingTask({ message: "Neural Audit in Progress", sub: "Aura Kernel v9.5.1 evaluating logical kernels" });
+    setLoadingTask({ message: "Conducting Neural Audit", sub: "Aura Kernel analyzing logic primitives and memory strides" });
     setEvaluation(null);
     
     try {
@@ -136,8 +150,7 @@ const App: React.FC = () => {
         setShowQuiz(true);
       }
     } catch (err) {
-      console.error("Evaluation Error:", err);
-      setNotification({ title: "Audit Exception", message: "Failed to verify neural logic.", icon: "🚨" });
+      setNotification({ title: "Audit Fault", message: "Kernel timeout. Connection uplink unstable.", icon: "🚨" });
     } finally {
       setLoadingTask(null);
     }
@@ -174,16 +187,15 @@ const App: React.FC = () => {
 
   const generateNewRoadmap = async () => {
     if (!user || !progress) return;
-    setLoadingTask({ message: "Synthesizing Career Path", sub: "Architecting strategic nodes for target profile" });
+    setLoadingTask({ message: "Synthesizing Career Strategy", sub: "Building tech-tree for target professional zenith" });
     try {
       const roadmapData = await generateCareerStrategy(interestInput, progress.completedQuests, progress.personalization);
       const updatedProgress: Progress = { ...progress, roadmapData };
       setProgress(updatedProgress);
       db.saveProgress(user.id, updatedProgress);
-      setNotification({ title: "Pathfinder Active", message: `Neural tech-tree has been generated.`, icon: "🗺️" });
+      setNotification({ title: "Pathfinder Initialized", message: `Neural tech-tree updated.`, icon: "🗺️" });
     } catch (err) {
-      console.error("Roadmap generation failed", err);
-      setNotification({ title: "Synthesis Error", message: "Strategic architecture failure.", icon: "⚠️" });
+      setNotification({ title: "Synthesis Error", message: "Strategic architecture calculation failed.", icon: "⚠️" });
     } finally {
       setLoadingTask(null);
     }
@@ -194,25 +206,25 @@ const App: React.FC = () => {
   if (view === 'Personalization') return <PersonalizationQuiz onComplete={handlePersonalizationComplete} />;
 
   const renderSimpleNav = () => (
-    <nav className="sticky top-0 z-50 bg-[#010208]/90 backdrop-blur-3xl border-b border-white/10 py-5">
+    <nav className="sticky top-0 z-50 bg-[#010208]/95 backdrop-blur-3xl border-b border-white/5 py-6">
       <div className="max-w-[1800px] mx-auto px-12 flex items-center justify-between">
-        <div className="flex items-center gap-5 cursor-pointer group" onClick={() => setView('Dashboard')}>
-          <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center font-black text-2xl text-white shadow-xl">P</div>
+        <div className="flex items-center gap-6 cursor-pointer group" onClick={() => setView('Dashboard')}>
+          <div className="w-12 h-12 bg-white text-black rounded-2xl flex items-center justify-center font-black text-2xl shadow-2xl transition-transform group-hover:scale-110 italic">P</div>
           <h1 className="text-2xl font-black text-white uppercase tracking-tighter">PyQuest</h1>
         </div>
         <div className="flex items-center gap-12">
           <div className="hidden lg:flex gap-12 text-[11px] font-black uppercase tracking-[0.5em] text-slate-500">
-            {['Dashboard', 'Academy', 'Strategist'].map((v) => (
+            {['Dashboard', 'Academy', 'Pathfinder'].map((v) => (
               <button 
                 key={v}
-                onClick={() => setView((v === 'Strategist' ? 'CareerPath' : v) as View)} 
-                className={`hover:text-white pb-1 border-b-2 transition-all ${view === (v === 'Strategist' ? 'CareerPath' : v) ? 'text-indigo-400 border-indigo-400' : 'border-transparent'}`}
+                onClick={() => setView((v === 'Pathfinder' ? 'CareerPath' : v) as View)} 
+                className={`hover:text-white pb-1 border-b-2 transition-all ${view === (v === 'Pathfinder' ? 'CareerPath' : v) ? 'text-indigo-400 border-indigo-400' : 'border-transparent'}`}
               >
                 {v}
               </button>
             ))}
           </div>
-          <button onClick={handleLogout} className="text-rose-500 hover:text-rose-400 font-black text-[11px] uppercase tracking-widest bg-rose-500/5 px-6 py-3 rounded-xl border border-rose-500/10 transition-all">TERMINATE SESSION</button>
+          <button onClick={handleLogout} className="text-rose-500 hover:text-rose-400 font-black text-[11px] uppercase tracking-widest bg-rose-500/5 px-8 py-3.5 rounded-2xl border border-rose-500/10 transition-all">TERMINATE_SESSION</button>
         </div>
       </div>
     </nav>
@@ -234,63 +246,63 @@ const App: React.FC = () => {
           />
         )}
         {view === 'Academy' && (
-          <div className="max-w-[1800px] mx-auto px-12 py-24 space-y-20 animate-in fade-in duration-1000">
-            <div className="space-y-4">
-              <span className="text-[11px] font-black text-indigo-400 uppercase tracking-[0.6em]">Academic Directory</span>
-              <h1 className="text-7xl font-black text-white tracking-tighter uppercase italic">Applied Repository.</h1>
+          <div className="max-w-[1800px] mx-auto px-12 py-32 space-y-24 animate-in fade-in duration-1000">
+            <div className="space-y-6">
+              <span className="text-[11px] font-black text-indigo-400 uppercase tracking-[0.8em]">Knowledge Base Directory</span>
+              <h1 className="text-8xl font-black text-white tracking-tighter uppercase italic">The Repository.</h1>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
               {QUESTS.map(q => <QuestCard key={q.id} quest={q} isCompleted={progress?.completedQuests.includes(q.id) || false} onSelect={handleQuestSelect} />)}
             </div>
           </div>
         )}
         {view === 'Quest' && currentQuest && (
-          <div className="max-w-[1800px] mx-auto px-12 py-20 grid grid-cols-1 lg:grid-cols-12 gap-16 animate-in fade-in duration-700">
-            <div className="lg:col-span-4 space-y-12">
-              <button onClick={() => setView('Academy')} className="flex items-center gap-4 text-slate-500 hover:text-white font-black text-[11px] uppercase tracking-widest transition-all group">
-                <span className="group-hover:-translate-x-1 transition-transform">&larr;</span> 
-                Return to Repository
+          <div className="max-w-[1800px] mx-auto px-12 py-24 grid grid-cols-1 lg:grid-cols-12 gap-20 animate-in fade-in duration-700">
+            <div className="lg:col-span-4 space-y-16">
+              <button onClick={() => setView('Academy')} className="flex items-center gap-6 text-slate-600 hover:text-white font-black text-[12px] uppercase tracking-widest transition-all group italic">
+                <span className="group-hover:-translate-x-2 transition-transform text-xl">←</span> 
+                Repository Ingress
               </button>
-              <div className="bg-[#0b0e14] border border-white/5 rounded-[64px] p-16 space-y-10 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/5 blur-[80px]"></div>
-                <h2 className="text-5xl font-black text-white uppercase tracking-tighter leading-none">{currentQuest.title}</h2>
-                <p className="text-xl text-slate-400 leading-relaxed font-medium">{currentQuest.longDescription}</p>
-                <div className="p-10 bg-indigo-600/5 border border-indigo-500/20 rounded-[40px]">
-                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em]">Current Objective</span>
-                  <p className="text-white text-xl font-bold mt-4 leading-tight">{currentQuest.objective}</p>
+              <div className="bg-[#0b0e14] border border-white/5 rounded-[80px] p-20 space-y-12 shadow-3xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 blur-[100px] -z-10 group-hover:bg-indigo-500/10 transition-all"></div>
+                <h2 className="text-6xl font-black text-white uppercase tracking-tighter leading-none italic">{currentQuest.title}</h2>
+                <p className="text-2xl text-slate-400 leading-relaxed font-medium">{currentQuest.longDescription}</p>
+                <div className="p-12 bg-indigo-600/5 border border-indigo-500/20 rounded-[48px]">
+                  <span className="text-[11px] font-black text-indigo-400 uppercase tracking-[0.6em]">Module Objective</span>
+                  <p className="text-white text-2xl font-bold mt-6 leading-tight uppercase italic">{currentQuest.objective}</p>
                 </div>
               </div>
             </div>
-            <div className="lg:col-span-8 space-y-10">
-              <div className="bg-[#0b0e14] rounded-[64px] border border-white/5 overflow-hidden flex flex-col h-[750px] shadow-3xl">
-                <div className="bg-[#05070d] px-10 py-5 border-b border-white/5 flex justify-between items-center">
-                  <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Applied_Kernel.py</span>
-                  <div className="flex gap-2">
+            <div className="lg:col-span-8 space-y-12">
+              <div className="bg-[#0b0e14] rounded-[80px] border border-white/5 overflow-hidden flex flex-col h-[850px] shadow-3xl">
+                <div className="bg-[#05070d] px-14 py-7 border-b border-white/5 flex justify-between items-center">
+                  <div className="flex items-center gap-4">
                     <div className="w-3 h-3 rounded-full bg-rose-500/20"></div>
                     <div className="w-3 h-3 rounded-full bg-emerald-500/20"></div>
+                    <span className="text-[11px] font-black text-slate-600 uppercase tracking-widest ml-4">Applied_Core.py</span>
                   </div>
                 </div>
                 <textarea 
                   value={code} onChange={(e) => setCode(e.target.value)} spellCheck={false}
-                  className="flex-1 w-full p-16 bg-[#010208] text-indigo-100 font-mono text-xl focus:outline-none resize-none leading-relaxed"
+                  className="flex-1 w-full p-20 bg-[#010208] text-indigo-100 font-mono text-2xl focus:outline-none resize-none leading-relaxed"
                 />
-                <div className="p-12 bg-slate-900/50 flex justify-between items-center border-t border-white/5">
-                  <div className="flex gap-10">
-                    <button onClick={async () => setAiHint(await getAIHint(currentQuest.title, currentQuest.objective, code))} className="text-[11px] font-black text-slate-500 hover:text-white uppercase tracking-widest transition-colors">Request Hint</button>
-                    <button onClick={() => setIsAuraOpen(true)} className="text-[11px] font-black text-indigo-500 hover:text-indigo-400 uppercase tracking-widest transition-colors">Consult Aura</button>
+                <div className="p-14 bg-slate-900/50 flex flex-col md:flex-row justify-between items-center gap-8 border-t border-white/5">
+                  <div className="flex gap-12">
+                    <button onClick={async () => setAiHint(await getAIHint(currentQuest.title, currentQuest.objective, code))} className="text-[12px] font-black text-slate-500 hover:text-white uppercase tracking-widest transition-colors italic">Request Hint</button>
+                    <button onClick={() => setIsAuraOpen(true)} className="text-[12px] font-black text-indigo-500 hover:text-indigo-400 uppercase tracking-widest transition-colors italic">Consult Aura</button>
                   </div>
-                  <button onClick={handleRunCode} className="px-14 py-5 bg-white text-black rounded-2xl font-black uppercase text-[12px] tracking-widest active:scale-95 shadow-2xl transition-all hover:bg-indigo-50">Audit Logic</button>
+                  <button onClick={handleRunCode} className="px-16 py-6 bg-white text-black rounded-3xl font-black uppercase text-sm tracking-widest active:scale-95 shadow-3xl transition-all hover:bg-indigo-50 italic">Audit Logic</button>
                 </div>
               </div>
-              {aiHint && <div className="bg-indigo-600/10 border border-indigo-500/20 p-10 rounded-[40px] text-center italic text-2xl text-indigo-200 animate-in slide-in-from-top-4">"{aiHint}"</div>}
+              {aiHint && <div className="bg-indigo-600/10 border border-indigo-500/20 p-12 rounded-[48px] text-center italic text-3xl text-indigo-200 animate-in slide-in-from-top-4">"{aiHint}"</div>}
               {evaluation && (
-                <div className="bg-[#0b0e14] border border-white/5 rounded-[64px] p-16 space-y-10 animate-in fade-in zoom-in duration-500 shadow-3xl">
+                <div className="bg-[#0b0e14] border border-white/5 rounded-[80px] p-20 space-y-12 animate-in fade-in zoom-in duration-700 shadow-3xl">
                   <div className="flex items-center justify-between">
-                    <h3 className={`text-3xl font-black uppercase tracking-tighter italic ${evaluation.status === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>{evaluation.status === 'success' ? 'Logic Verified' : 'Logic Fault Detected'}</h3>
-                    <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${evaluation.status === 'success' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>Status: {evaluation.status}</div>
+                    <h3 className={`text-4xl font-black uppercase tracking-tighter italic ${evaluation.status === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>{evaluation.status === 'success' ? 'Logic Valid' : 'Logic Fault'}</h3>
+                    <div className={`px-6 py-2 rounded-full text-[11px] font-black uppercase tracking-widest ${evaluation.status === 'success' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>Kernel_{evaluation.status}</div>
                   </div>
-                  <p className="text-xl text-slate-400 font-medium leading-relaxed">{evaluation.feedback}</p>
-                  <div className="h-[400px] w-full"><Visualizer data={evaluation.visualizationData || []} /></div>
+                  <p className="text-2xl text-slate-400 font-medium leading-relaxed italic">"{evaluation.feedback}"</p>
+                  <div className="h-[450px] w-full"><Visualizer data={evaluation.visualizationData || []} /></div>
                 </div>
               )}
             </div>
@@ -298,16 +310,16 @@ const App: React.FC = () => {
           </div>
         )}
         {view === 'CareerPath' && (
-          <div className="max-w-[1600px] mx-auto px-12 py-32 space-y-24 animate-in fade-in duration-1000">
-            <div className="text-center space-y-6">
-              <span className="text-[11px] font-black text-indigo-400 uppercase tracking-[0.6em]">Neural Strategist</span>
-              <h1 className="text-8xl font-black text-white tracking-tighter uppercase italic">Pathfinder.</h1>
-              <p className="text-2xl text-slate-500 font-medium max-w-4xl mx-auto">Define your target career objective to generate a high-fidelity technology roadmap.</p>
+          <div className="max-w-[1600px] mx-auto px-12 py-40 space-y-32 animate-in fade-in duration-1000">
+            <div className="text-center space-y-8">
+              <span className="text-[11px] font-black text-indigo-400 uppercase tracking-[0.8em]">Neural Strategist Unit</span>
+              <h1 className="text-9xl font-black text-white tracking-tighter uppercase italic">Pathfinder.</h1>
+              <p className="text-3xl text-slate-500 font-medium max-w-5xl mx-auto leading-tight">Define your objective to synthesize a high-fidelity roadmap.</p>
             </div>
-            <div className="bg-[#0b0e14] border border-white/5 rounded-[80px] p-24 space-y-12 text-center shadow-3xl relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-96 h-96 bg-indigo-600/5 blur-[120px]"></div>
-              <input value={interestInput} onChange={(e) => setInterestInput(e.target.value)} className="w-full bg-black/40 border-2 border-white/5 rounded-[32px] px-12 py-10 text-3xl text-white outline-none focus:border-indigo-600 transition-all text-center font-black placeholder:text-slate-800" placeholder="e.g. Quant Research, Deep Perception, Robotics Architect..." />
-              <button onClick={generateNewRoadmap} disabled={isGeneratingPath || !interestInput} className="w-full bg-white text-black py-10 rounded-[32px] text-3xl font-black active:scale-95 disabled:opacity-50 hover:bg-indigo-50 transition-all shadow-2xl uppercase tracking-tighter">Architect Roadmap</button>
+            <div className="bg-[#0b0e14] border border-white/5 rounded-[100px] p-32 space-y-16 text-center shadow-3xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-indigo-600/5 blur-[150px] -z-10 animate-neural"></div>
+              <input value={interestInput} onChange={(e) => setInterestInput(e.target.value)} className="w-full bg-black/40 border-2 border-white/10 rounded-[48px] px-16 py-12 text-4xl text-white outline-none focus:border-indigo-600 transition-all text-center font-black placeholder:text-slate-900 italic" placeholder="e.g. Lead Robotics Engineer, Data Scientist..." />
+              <button onClick={generateNewRoadmap} disabled={!interestInput} className="w-full bg-white text-black py-12 rounded-[48px] text-4xl font-black active:scale-95 disabled:opacity-50 hover:bg-indigo-50 transition-all shadow-3xl uppercase tracking-tighter italic">Architect Strategy</button>
             </div>
             {progress?.roadmapData && <CareerArchitect data={progress.roadmapData} />}
           </div>
@@ -318,12 +330,16 @@ const App: React.FC = () => {
         isOpen={isAuraOpen} 
         onClose={() => setIsAuraOpen(false)} 
         onOpen={() => setIsAuraOpen(true)}
-        context={currentQuest ? `Quest: ${currentQuest.title}` : 'Global Exploration'}
+        context={currentQuest ? `Current Quest: ${currentQuest.title}` : 'Global Architect Terminal'}
         personalization={progress?.personalization}
       />
 
       {loadingTask && <LoadingOverlay message={loadingTask.message} subMessage={loadingTask.sub} />}
       {notification && <Notification title={notification.title} message={notification.message} icon={notification.icon} onClose={() => setNotification(null)} />}
+      <style>{`
+        @keyframes neural-drift { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .animate-neural { animation: neural-drift 30s infinite ease-in-out; }
+      `}</style>
     </div>
   );
 };

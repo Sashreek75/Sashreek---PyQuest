@@ -2,11 +2,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { CodeEvaluation, RoadmapData, UserPersonalization } from "../types";
 
-/**
- * Lead AI Mentor: Aura
- * Lead Strategic Architect: PyQuest Strategic Architect
- */
-
 export const evaluateQuestCode = async (
   questTitle: string,
   objective: string,
@@ -18,7 +13,7 @@ export const evaluateQuestCode = async (
   const systemInstruction = `
     You are 'Aura', the Lead AI Mentor at PyQuest Academy. Evaluate Python ML code.
     Check syntax, logic, best practices. Generate realistic metrics and Recharts visualization data.
-    ${personalization ? `The user's focus is ${personalization.focus} and their goal is ${personalization.ambition}. Tailor feedback to this context.` : ''}
+    ${personalization ? `The user's professional focus is ${personalization.focus} and their ambition is ${personalization.ambition}. Tailor feedback to this context.` : ''}
     Return JSON only.
   `;
 
@@ -73,7 +68,7 @@ export const evaluateQuestCode = async (
     console.error("Evaluation failed:", error);
     return { 
       status: 'error', 
-      feedback: "Audit kernel failure. Please check your network connection and API key configuration.", 
+      feedback: "Audit kernel failure. Connection to the mentoring core was severed.", 
       technicalDetails: String(error), 
       suggestedResources: [] 
     };
@@ -81,41 +76,59 @@ export const evaluateQuestCode = async (
 };
 
 export const generatePersonalizedProfile = async (
-  field: string,
-  ambition: string,
-  proficiency: string,
-  focus: string
+  rawInterests: string,
+  rawGoal: string,
+  rawProficiency: string,
+  rawWorkStyle: string
 ): Promise<UserPersonalization> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const systemInstruction = `
-    You are the 'PyQuest Neural Profiler'. Based on user inputs, synthesize a 'Neural Directive' and a concise 'Profile Summary'.
-    The Directive should be a high-fidelity, professional objective statement (max 20 words).
-    The Summary should explain how PyQuest will evolve them from ${proficiency} to ${ambition} in the field of ${field}.
+    You are the 'PyQuest Neural Profiler'. You translate beginner desires into professional AI trajectories.
+    INPUT:
+    - Interests: ${rawInterests}
+    - Life Goal: ${rawGoal}
+    - Level: ${rawProficiency}
+    - Style: ${rawWorkStyle}
+
+    TASK:
+    1. Determine a technical 'focus' (e.g., 'NLP', 'Computer Vision', 'Predictive Analytics').
+    2. Determine a technical 'ambition' (e.g., 'Senior MLOps Engineer', 'AI Research Scientist').
+    3. Synthesize a 'Neural Directive': A high-fidelity, professional objective statement (max 20 words).
+    4. Provide a 'Summary' of their personalized path.
+    
     Return JSON ONLY.
   `;
 
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
-      contents: `Field: ${field}, Ambition: ${ambition}, Proficiency: ${proficiency}, Focus: ${focus}`,
+      contents: "Generate the technical profile based on these human inputs.",
       config: {
         systemInstruction,
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
+            focus: { type: Type.STRING },
+            ambition: { type: Type.STRING },
             aiDirective: { type: Type.STRING },
             summary: { type: Type.STRING }
           },
-          required: ["aiDirective", "summary"]
+          required: ["focus", "ambition", "aiDirective", "summary"]
         }
       }
     });
     const result = JSON.parse(response.text || '{}');
+    
     return {
-      field, ambition, proficiency, focus,
+      field: rawInterests,
+      ambition: result.ambition,
+      proficiency: rawProficiency,
+      focus: result.focus,
       aiDirective: result.aiDirective,
-      summary: result.summary
+      summary: result.summary,
+      philosophies: [rawWorkStyle],
+      targetHardware: "General Computing"
     };
   } catch (error) {
     console.error("Profile generation failed:", error);
@@ -127,11 +140,10 @@ export const chatWithAura = async (message: string, context?: string, personaliz
   try {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const systemInstruction = `
-      You are Aura, the elite AI Mentor for PyQuest. You are technical, encouraging, and highly professional.
-      Your goal is to help students understand Python, Machine Learning, and Neural Networks.
-      Context of user's current activity: ${context || 'General Dashboard'}.
-      ${personalization ? `USER PROFILE: Field: ${personalization.field}, Goal: ${personalization.ambition}, Focus: ${personalization.focus}. Reference this in your mentorship.` : ''}
-      Always provide concise but deep technical answers. Use Markdown for code snippets.
+      You are Aura, the elite AI Mentor for PyQuest. You are technical but empathetic.
+      The student might be a complete beginner. Explain concepts using analogies when needed.
+      ${personalization ? `USER PROFILE: Focus: ${personalization.focus}, Ambition: ${personalization.ambition}. Tailor your advice to help them reach this goal.` : ''}
+      Use Markdown for code snippets.
     `;
     
     const response = await ai.models.generateContent({
@@ -143,7 +155,7 @@ export const chatWithAura = async (message: string, context?: string, personaliz
     return response.text || "Neural connection weak. Please repeat transmission.";
   } catch (error) {
     console.error("Aura Chat Error:", error);
-    return "Kernel error. My logic processors are rebooting. Try again in a moment.";
+    return "Kernel error. My logic processors are rebooting.";
   }
 };
 
@@ -156,8 +168,7 @@ export const getAIHint = async (questTitle: string, objective: string, code: str
     });
     return response.text?.trim() || "Analyze your mathematical operations.";
   } catch (error) {
-    console.error("Hint generation failed:", error);
-    return "The mentor is momentarily offline. Review your logic structure.";
+    return "The mentor is momentarily offline.";
   }
 };
 
@@ -166,23 +177,18 @@ export const generateCareerStrategy = async (
   completedQuestIds: string[],
   personalization?: UserPersonalization
 ): Promise<RoadmapData> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const systemInstruction = `
-    You are the 'PyQuest Strategic Architect'. Generate a visual tech roadmap for a user interested in ${interest}.
-    ${personalization ? `Incorporate their background in ${personalization.field} and their ambition to become a ${personalization.ambition}.` : ''}
-    
-    RULES:
-    1. Analyze completedQuestIds: ${JSON.stringify(completedQuestIds)} to determine 'Mastered' vs 'Active' vs 'Locked' nodes.
-    2. Provide 8-12 nodes in a sequential or branching tech tree.
-    3. Include 'duration' for each node.
-    4. Provide x (0-100) and y (increments of 100-150) coordinates.
-    5. Return JSON ONLY.
+    You are the 'PyQuest Strategic Architect'. Generate a visual tech roadmap.
+    ${personalization ? `Target Role: ${personalization.ambition}. Field: ${personalization.field}.` : ''}
+    Provide 8-12 sequential nodes.
+    Return JSON ONLY.
   `;
 
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
-      contents: `User Interest: ${interest}. Completed Quest IDs: ${completedQuestIds.join(', ')}`,
+      contents: `User Interest: ${interest}. Completed: ${completedQuestIds.join(', ')}`,
       config: {
         systemInstruction,
         responseMimeType: "application/json",

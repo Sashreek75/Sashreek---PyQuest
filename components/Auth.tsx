@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { User } from '../types';
 import { db } from '../services/dbService';
@@ -14,17 +13,20 @@ const Auth: React.FC<AuthProps> = ({ onAuth, onBack }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [handshakeStep, setHandshakeStep] = useState(0);
 
-  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!validateEmail(email)) {
+    const cleanEmail = email.trim();
+
+    if (!validateEmail(cleanEmail)) {
       setError('Invalid Neural ID format (Email)');
       return;
     }
@@ -47,8 +49,8 @@ const Auth: React.FC<AuthProps> = ({ onAuth, onBack }) => {
     setIsProcessing(true);
     setHandshakeStep(0);
     
-    // Handshake animation
-    const steps = ["Encrypting Credentials...", "Handshaking with Sentinel...", "Syncing Neural Progress...", "Access Granted"];
+    // Cinematic Handshake
+    const steps = ["Hashing Keys...", "Syncing Distributed Nodes...", "Finalizing Identity Matrix...", "Access Granted"];
     let currentStep = 0;
     const interval = setInterval(() => {
       setHandshakeStep(currentStep);
@@ -62,69 +64,73 @@ const Auth: React.FC<AuthProps> = ({ onAuth, onBack }) => {
 
   const processAuth = () => {
     try {
+      const cleanEmail = email.trim().toLowerCase();
+      const cleanUsername = username.trim();
+
       if (activeTab === 'login') {
-        const user = db.login(email.trim(), password);
-        if (user) {
-          db.setSession(user);
-          onAuth(user);
+        const result = db.login(cleanEmail, password);
+        if (result.success) {
+          const sessionUser = { ...result.user, rememberMe };
+          db.setSession(sessionUser);
+          onAuth(sessionUser);
         } else {
-          setError('Authorization Failed: Identity not found or key mismatch.');
           setIsProcessing(false);
-          setHandshakeStep(0);
+          // Fix: Narrowing AuthResult using 'in' operator to safely access 'reason' property
+          if ('reason' in result) {
+            if (result.reason === 'NOT_FOUND') {
+              setError('Neural ID not found. Did you create a profile yet?');
+            } else if (result.reason === 'WRONG_PASSWORD') {
+              setError('Access Key mismatch. Verify your credentials.');
+            } else {
+              setError('Authorization Failure: Uplink unstable.');
+            }
+          }
         }
       } else {
         const newUser: User = {
           id: `PQ-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-          username: username.trim(),
-          email: email.trim().toLowerCase(),
+          username: cleanUsername,
+          email: cleanEmail,
           password: password,
           createdAt: new Date().toISOString(),
           interests: '',
           goal: '',
           avatarSeed: Math.random().toString(36).substr(2, 9),
-          provider: 'email'
+          provider: 'email',
+          rememberMe
         };
 
         const result = db.register(newUser);
         if (result.success) {
-          const registeredUser = db.login(email.trim(), password);
-          if (registeredUser) {
-            db.setSession(registeredUser);
-            onAuth(registeredUser);
-          } else {
-            setError('Registration succeeded but login failed. Please try logging in.');
-            setIsProcessing(false);
-            setHandshakeStep(0);
-          }
+          db.setSession(newUser);
+          onAuth(newUser);
         } else {
-          setError(result.error || 'Registration failed.');
+          setError(result.error || 'Identity Registration failed.');
           setIsProcessing(false);
-          setHandshakeStep(0);
         }
       }
     } catch (err) {
-      console.error('Auth error:', err);
-      setError('Neural Kernel exception occurred. Please try again.');
+      console.error('Auth crash:', err);
+      setError('Kernel Exception: Memory fault. Reload required.');
       setIsProcessing(false);
-      setHandshakeStep(0);
     }
   };
 
   if (isProcessing) {
-    const steps = ["ENCRYPTING...", "HANDSHAKING...", "SYNCING...", "GRANTED"];
+    const labels = ["ENCRYPTING", "SYNCING", "FINALIZING", "ACTIVE"];
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#010208] relative overflow-hidden">
         <div className="absolute inset-0 bg-indigo-600/5 animate-pulse"></div>
-        <div className="z-10 text-center space-y-8 animate-in zoom-in duration-500">
-          <div className="relative">
-            <div className="w-32 h-32 rounded-full border-4 border-indigo-500/10 border-t-indigo-500 animate-spin mx-auto"></div>
+        <div className="z-10 text-center space-y-12 animate-in zoom-in duration-500">
+          <div className="relative w-40 h-40 mx-auto">
+            <div className="absolute inset-0 border-4 border-indigo-500/10 border-t-indigo-500 animate-[spin_1s_linear_infinite] rounded-full"></div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-3xl crt-flicker">P</div>
+              <div className="w-20 h-20 bg-indigo-600 rounded-3xl flex items-center justify-center text-white font-black text-4xl shadow-3xl crt-flicker italic">P</div>
             </div>
           </div>
-          <div className="space-y-2">
-            <div className="text-3xl font-black text-white tracking-tighter uppercase">{steps[handshakeStep]}</div>
-            <div className="text-[10px] font-black text-slate-500 uppercase tracking-[0.6em]">System Integrity Check: Valid</div>
+          <div className="space-y-4">
+            <div className="text-4xl font-black text-white tracking-tighter uppercase italic">{labels[handshakeStep]}</div>
+            <div className="text-[10px] font-black text-slate-500 uppercase tracking-[0.8em]">System Integrity: Validated</div>
           </div>
         </div>
       </div>
@@ -132,86 +138,93 @@ const Auth: React.FC<AuthProps> = ({ onAuth, onBack }) => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#010208] px-6 py-20 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-[#010208] px-12 py-24 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-20%] left-[-10%] w-[1000px] h-[1000px] bg-indigo-600/10 rounded-full blur-[180px] animate-neural"></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-[800px] h-[800px] bg-violet-600/5 rounded-full blur-[150px] animate-neural"></div>
+        <div className="absolute top-[-20%] left-[-10%] w-[1200px] h-[1200px] bg-indigo-600/10 rounded-full blur-[200px] animate-neural"></div>
       </div>
 
-      <div className="w-full max-w-lg bg-[#0b0e14]/90 border border-white/5 rounded-[56px] p-10 md:p-14 shadow-3xl backdrop-blur-3xl relative z-10 space-y-10 animate-in fade-in zoom-in duration-500">
+      <div className="w-full max-w-xl bg-[#0b0e14]/90 border border-white/5 rounded-[64px] p-16 md:p-24 shadow-3xl backdrop-blur-3xl relative z-10 space-y-12 animate-in fade-in zoom-in duration-700">
         <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[22px] flex items-center justify-center font-black text-3xl mx-auto text-white shadow-2xl crt-flicker mb-8">P</div>
+          <div className="w-20 h-20 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[32px] flex items-center justify-center font-black text-4xl mx-auto text-white shadow-3xl crt-flicker mb-10 italic">P</div>
           
-          <div className="flex bg-black/40 p-1 rounded-2xl border border-white/5 mb-10">
+          <div className="flex bg-black/60 p-1.5 rounded-[28px] border border-white/5 mb-12">
             <button 
               onClick={() => { setActiveTab('login'); setError(''); }}
-              className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'login' ? 'bg-white text-black shadow-xl' : 'text-slate-500 hover:text-white'}`}
+              className={`flex-1 py-4 rounded-[22px] text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'login' ? 'bg-white text-black shadow-2xl scale-105' : 'text-slate-500 hover:text-white'}`}
             >
-              Sign In
+              Uplink
             </button>
             <button 
               onClick={() => { setActiveTab('register'); setError(''); }}
-              className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'register' ? 'bg-white text-black shadow-xl' : 'text-slate-500 hover:text-white'}`}
+              className={`flex-1 py-4 rounded-[22px] text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'register' ? 'bg-white text-black shadow-2xl scale-105' : 'text-slate-500 hover:text-white'}`}
             >
-              Register
+              New Profile
             </button>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-8">
           {activeTab === 'register' && (
-            <div className="space-y-2">
-              <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest px-4">Architect Name</label>
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-6">Architect Designation</label>
               <input 
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-white font-medium outline-none focus:border-indigo-600 transition-all" 
+                className="w-full bg-black/60 border border-white/5 rounded-3xl px-8 py-5 text-white font-bold outline-none focus:border-indigo-600 transition-all text-lg" 
                 placeholder="Ex: Alan_Turing"
               />
             </div>
           )}
           
-          <div className="space-y-2">
-            <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest px-4">Neural ID (Email)</label>
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-6">Neural ID (Email)</label>
             <input 
               required
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-white font-medium outline-none focus:border-indigo-600 transition-all" 
+              className="w-full bg-black/60 border border-white/5 rounded-3xl px-8 py-5 text-white font-bold outline-none focus:border-indigo-600 transition-all text-lg" 
               placeholder="pioneer@pyquest.ai"
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest px-4">Access Key</label>
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-6">Access Key</label>
             <input 
               required
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-white font-medium outline-none focus:border-indigo-600 transition-all" 
+              className="w-full bg-black/60 border border-white/5 rounded-3xl px-8 py-5 text-white font-bold outline-none focus:border-indigo-600 transition-all text-lg" 
               placeholder="••••••••"
             />
           </div>
 
           {activeTab === 'register' && (
-            <div className="space-y-2">
-              <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest px-4">Confirm Key</label>
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-6">Verify Key</label>
               <input 
                 required
                 type="password"
                 value={confirmPassword}
+                // Fix: Correctly update confirmPassword state instead of password
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-white font-medium outline-none focus:border-indigo-600 transition-all" 
+                className="w-full bg-black/60 border border-white/5 rounded-3xl px-8 py-5 text-white font-bold outline-none focus:border-indigo-600 transition-all text-lg" 
                 placeholder="••••••••"
               />
             </div>
           )}
 
+          <div className="flex items-center gap-4 px-4 cursor-pointer" onClick={() => setRememberMe(!rememberMe)}>
+            <div className={`w-6 h-6 rounded-lg border-2 border-white/10 flex items-center justify-center transition-all ${rememberMe ? 'bg-indigo-600 border-indigo-500' : 'bg-black/40'}`}>
+              {rememberMe && <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>}
+            </div>
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Keep Session Persisted</span>
+          </div>
+
           {error && (
-            <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[10px] font-black uppercase rounded-2xl text-center">
+            <div className="p-5 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-black uppercase rounded-3xl text-center animate-pulse">
               {error}
             </div>
           )}
@@ -219,16 +232,20 @@ const Auth: React.FC<AuthProps> = ({ onAuth, onBack }) => {
           <button 
             type="submit" 
             disabled={isProcessing}
-            className="w-full bg-white text-slate-950 py-5 rounded-2xl font-black text-lg uppercase tracking-tighter shadow-3xl hover:bg-indigo-50 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-white text-slate-950 py-6 rounded-3xl font-black text-xl uppercase tracking-tighter shadow-3xl hover:bg-indigo-50 transition-all active:scale-95 disabled:opacity-50"
           >
-            {activeTab === 'login' ? 'Synchronize Session' : 'Initialize Profile'}
+            {activeTab === 'login' ? 'Synchronize' : 'Register Profile'}
           </button>
         </form>
 
-        <div className="text-center pt-4">
-          <button onClick={onBack} className="text-[9px] font-black text-slate-800 uppercase tracking-[0.5em] hover:text-slate-500 transition-colors">Abort Terminal Connection</button>
+        <div className="text-center pt-6 border-t border-white/5">
+          <button onClick={onBack} className="text-[10px] font-black text-slate-800 uppercase tracking-[0.8em] hover:text-slate-500 transition-colors">Abort Terminal Ingress</button>
         </div>
       </div>
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes neural-drift { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .animate-neural { animation: neural-drift 20s infinite ease-in-out; }
+      ` }} />
     </div>
   );
 };
