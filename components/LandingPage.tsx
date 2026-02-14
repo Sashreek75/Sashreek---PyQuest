@@ -121,8 +121,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onInitialize }) => {
           </div>
 
           <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-black text-white tracking-tighter leading-[0.85] uppercase italic">
-            Architect <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-violet-400 to-pink-500">The Core.</span>
+            Build <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-violet-400 to-pink-500">Your Dream.</span>
           </h1>
 
           <p className="text-xl md:text-3xl text-slate-400 max-w-4xl mx-auto leading-relaxed font-medium">
