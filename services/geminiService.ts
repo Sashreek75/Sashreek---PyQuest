@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { CodeEvaluation, RoadmapData } from "../types";
+import { CodeEvaluation, RoadmapData, UserPersonalization } from "../types";
 
 /**
  * Lead AI Mentor: Aura
@@ -10,13 +10,15 @@ import { CodeEvaluation, RoadmapData } from "../types";
 export const evaluateQuestCode = async (
   questTitle: string,
   objective: string,
-  userCode: string
+  userCode: string,
+  personalization?: UserPersonalization
 ): Promise<CodeEvaluation> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const systemInstruction = `
     You are 'Aura', the Lead AI Mentor at PyQuest Academy. Evaluate Python ML code.
     Check syntax, logic, best practices. Generate realistic metrics and Recharts visualization data.
+    ${personalization ? `The user's focus is ${personalization.focus} and their goal is ${personalization.ambition}. Tailor feedback to this context.` : ''}
     Return JSON only.
   `;
 
@@ -78,13 +80,57 @@ export const evaluateQuestCode = async (
   }
 };
 
-export const chatWithAura = async (message: string, context?: string): Promise<string> => {
+export const generatePersonalizedProfile = async (
+  field: string,
+  ambition: string,
+  proficiency: string,
+  focus: string
+): Promise<UserPersonalization> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const systemInstruction = `
+    You are the 'PyQuest Neural Profiler'. Based on user inputs, synthesize a 'Neural Directive' and a concise 'Profile Summary'.
+    The Directive should be a high-fidelity, professional objective statement (max 20 words).
+    The Summary should explain how PyQuest will evolve them from ${proficiency} to ${ambition} in the field of ${field}.
+    Return JSON ONLY.
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3-pro-preview",
+      contents: `Field: ${field}, Ambition: ${ambition}, Proficiency: ${proficiency}, Focus: ${focus}`,
+      config: {
+        systemInstruction,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            aiDirective: { type: Type.STRING },
+            summary: { type: Type.STRING }
+          },
+          required: ["aiDirective", "summary"]
+        }
+      }
+    });
+    const result = JSON.parse(response.text || '{}');
+    return {
+      field, ambition, proficiency, focus,
+      aiDirective: result.aiDirective,
+      summary: result.summary
+    };
+  } catch (error) {
+    console.error("Profile generation failed:", error);
+    throw error;
+  }
+};
+
+export const chatWithAura = async (message: string, context?: string, personalization?: UserPersonalization): Promise<string> => {
   try {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const systemInstruction = `
       You are Aura, the elite AI Mentor for PyQuest. You are technical, encouraging, and highly professional.
       Your goal is to help students understand Python, Machine Learning, and Neural Networks.
       Context of user's current activity: ${context || 'General Dashboard'}.
+      ${personalization ? `USER PROFILE: Field: ${personalization.field}, Goal: ${personalization.ambition}, Focus: ${personalization.focus}. Reference this in your mentorship.` : ''}
       Always provide concise but deep technical answers. Use Markdown for code snippets.
     `;
     
@@ -117,10 +163,12 @@ export const getAIHint = async (questTitle: string, objective: string, code: str
 
 export const generateCareerStrategy = async (
   interest: string,
-  completedQuestIds: string[]
+  completedQuestIds: string[],
+  personalization?: UserPersonalization
 ): Promise<RoadmapData> => {
   const systemInstruction = `
     You are the 'PyQuest Strategic Architect'. Generate a visual tech roadmap for a user interested in ${interest}.
+    ${personalization ? `Incorporate their background in ${personalization.field} and their ambition to become a ${personalization.ambition}.` : ''}
     
     RULES:
     1. Analyze completedQuestIds: ${JSON.stringify(completedQuestIds)} to determine 'Mastered' vs 'Active' vs 'Locked' nodes.

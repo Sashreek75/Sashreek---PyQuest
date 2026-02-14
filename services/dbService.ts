@@ -33,6 +33,7 @@ class DatabaseService {
     if (users.find(u => u.email.toLowerCase() === user.email.toLowerCase())) {
       return { success: false, error: 'Neural ID already exists in our archives.' };
     }
+    // In a real app, we'd hash this. For PyQuest, we keep it simple but consistent.
     users.push(user);
     this.saveUsers(users);
     return { success: true };
@@ -40,7 +41,10 @@ class DatabaseService {
 
   public login(email: string, password?: string): User | null {
     const users = this.getUsers();
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+    const user = users.find(u => 
+      u.email.toLowerCase() === email.toLowerCase() && 
+      u.password === password
+    );
     return user || null;
   }
 
@@ -50,7 +54,11 @@ class DatabaseService {
 
   public getSession(): User | null {
     const data = localStorage.getItem(KEYS.SESSION);
-    return data ? JSON.parse(data) : null;
+    try {
+      return data ? JSON.parse(data) : null;
+    } catch {
+      return null;
+    }
   }
 
   public clearSession() {

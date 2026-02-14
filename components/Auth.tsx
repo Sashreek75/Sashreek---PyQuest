@@ -45,6 +45,7 @@ const Auth: React.FC<AuthProps> = ({ onAuth, onBack }) => {
     }
 
     setIsProcessing(true);
+    setHandshakeStep(0);
     
     // Handshake animation
     const steps = ["Encrypting Credentials...", "Handshaking with Sentinel...", "Syncing Neural Progress...", "Access Granted"];
@@ -62,13 +63,14 @@ const Auth: React.FC<AuthProps> = ({ onAuth, onBack }) => {
   const processAuth = () => {
     try {
       if (activeTab === 'login') {
-        const user = db.login(email, password);
+        const user = db.login(email.trim(), password);
         if (user) {
           db.setSession(user);
           onAuth(user);
         } else {
           setError('Authorization Failed: Identity not found or key mismatch.');
           setIsProcessing(false);
+          setHandshakeStep(0);
         }
       } else {
         const newUser: User = {
@@ -85,16 +87,26 @@ const Auth: React.FC<AuthProps> = ({ onAuth, onBack }) => {
 
         const result = db.register(newUser);
         if (result.success) {
-          db.setSession(newUser);
-          onAuth(newUser);
+          const registeredUser = db.login(email.trim(), password);
+          if (registeredUser) {
+            db.setSession(registeredUser);
+            onAuth(registeredUser);
+          } else {
+            setError('Registration succeeded but login failed. Please try logging in.');
+            setIsProcessing(false);
+            setHandshakeStep(0);
+          }
         } else {
           setError(result.error || 'Registration failed.');
           setIsProcessing(false);
+          setHandshakeStep(0);
         }
       }
     } catch (err) {
+      console.error('Auth error:', err);
       setError('Neural Kernel exception occurred. Please try again.');
       setIsProcessing(false);
+      setHandshakeStep(0);
     }
   };
 
@@ -130,7 +142,6 @@ const Auth: React.FC<AuthProps> = ({ onAuth, onBack }) => {
         <div className="text-center">
           <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[22px] flex items-center justify-center font-black text-3xl mx-auto text-white shadow-2xl crt-flicker mb-8">P</div>
           
-          {/* Tab Selector */}
           <div className="flex bg-black/40 p-1 rounded-2xl border border-white/5 mb-10">
             <button 
               onClick={() => { setActiveTab('login'); setError(''); }}
@@ -207,7 +218,8 @@ const Auth: React.FC<AuthProps> = ({ onAuth, onBack }) => {
 
           <button 
             type="submit" 
-            className="w-full bg-white text-slate-950 py-5 rounded-2xl font-black text-lg uppercase tracking-tighter shadow-3xl hover:bg-indigo-50 transition-all active:scale-95"
+            disabled={isProcessing}
+            className="w-full bg-white text-slate-950 py-5 rounded-2xl font-black text-lg uppercase tracking-tighter shadow-3xl hover:bg-indigo-50 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {activeTab === 'login' ? 'Synchronize Session' : 'Initialize Profile'}
           </button>

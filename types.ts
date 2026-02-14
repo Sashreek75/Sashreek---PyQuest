@@ -27,6 +27,15 @@ export interface Achievement {
   unlockedAt?: string;
 }
 
+export interface UserPersonalization {
+  field: string;
+  ambition: string;
+  proficiency: string;
+  focus: string;
+  aiDirective: string;
+  summary: string;
+}
+
 export interface Quest {
   id: string;
   title: string;
@@ -108,6 +117,7 @@ export interface Progress {
   lastActiveDate?: string;
   achievements: Achievement[];
   dailyLoginCount: number;
+  personalization?: UserPersonalization;
 }
 
 export interface CodeEvaluation {
