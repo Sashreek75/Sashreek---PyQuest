@@ -81,6 +81,7 @@ export interface UserStats {
   questsCompleted: number;
   accuracy: number;
   streak: number;
+  longestStreak: number;
   badges: string[];
   rank: string;
   totalHours: number;
@@ -109,6 +110,13 @@ export interface RoadmapData {
   nodes: RoadmapNode[];
 }
 
+export interface ActivityRecord {
+  date: string;
+  questId: string;
+  xpEarned: number;
+  type: 'quest' | 'quiz';
+}
+
 export interface Progress {
   userId: string;
   completedQuests: string[];
@@ -117,10 +125,14 @@ export interface Progress {
   careerGoal?: string;
   roadmapData?: RoadmapData;
   currentStreak: number;
+  longestStreak: number;
   lastActiveDate?: string;
   achievements: Achievement[];
   dailyLoginCount: number;
   personalization?: UserPersonalization;
+  // Real tracking data
+  activityLog: ActivityRecord[];
+  topicXP: Record<string, number>;
 }
 
 export interface CodeEvaluation {
@@ -137,4 +149,21 @@ export interface CodeEvaluation {
   visualizationData?: any[];
   mentorAdvice?: string;
   suggestedResources: string[];
+}
+
+export interface SandboxAudit {
+  efficiencyScore: number;
+  bigO: string;
+  architecturalReview: string;
+  suggestedImprovements: string[];
+  isProductionReady: boolean;
+  securityNotes?: string;
+  visualizationData?: any[];
+}
+
+export interface SyntheticDataset {
+  name: string;
+  description: string;
+  data: string;
+  format: 'csv' | 'json';
 }

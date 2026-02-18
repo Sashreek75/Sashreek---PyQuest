@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { CodeEvaluation, RoadmapData, UserPersonalization } from "../types";
+import { CodeEvaluation, RoadmapData, UserPersonalization, SandboxAudit, SyntheticDataset } from "../types";
 
 export const evaluateQuestCode = async (
   questTitle: string,
@@ -11,15 +11,19 @@ export const evaluateQuestCode = async (
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const systemInstruction = `
-    You are 'Aura', the Lead AI Mentor at PyQuest Academy. Evaluate Python ML code.
-    Check syntax, logic, best practices. Generate realistic metrics and Recharts visualization data.
-    ${personalization ? `The user's professional focus is ${personalization.focus} and their ambition is ${personalization.ambition}. Tailor feedback to this context.` : ''}
+    You are 'Aura', the Lead AI Mentor at PyQuest Academy. 
+    ROLE: You are an expert pair programmer and encouraging coach. 
+    STYLE: Use a professional but approachable tone. Use emojis to highlight key points (e.g., 💡, 🚀, ✅, 🧠).
+    FORMATTING: Use Markdown. Use bold headers for sections. Use bullet points for technical details. Avoid long paragraphs.
+    FEEDBACK: Be specific. Don't just say 'good job'. Explain *why* the code works or how it could be more 'Pythonic'.
+    ${personalization ? `The student's focus is ${personalization.focus} and their ambition is ${personalization.ambition}. Connect your feedback to their career goals.` : ''}
     Return JSON only.
   `;
 
   const prompt = `
     QUEST: ${questTitle} | OBJECTIVE: ${objective}
     CODE: \`\`\`python\n${userCode}\n\`\`\`
+    Please evaluate this submission. Provide a visualizationData array if relevant (e.g., loss curves or accuracy metrics).
   `;
 
   try {
@@ -68,10 +72,140 @@ export const evaluateQuestCode = async (
     console.error("Evaluation failed:", error);
     return { 
       status: 'error', 
-      feedback: "Audit kernel failure. Connection to the mentoring core was severed.", 
+      feedback: "Audit kernel failure. 🚨 Connection to the mentoring core was severed.", 
       technicalDetails: String(error), 
       suggestedResources: [] 
     };
+  }
+};
+
+export const auditSandboxCode = async (userCode: string, context?: string): Promise<SandboxAudit> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const systemInstruction = `
+    You are the 'PyQuest Senior Architect'. You are performing a professional code review.
+    TONE: Direct, insightful, and highly technical yet accessible. 
+    GOAL: Help the user transform 'working code' into 'production-ready architecture'.
+    Use emojis to denote different audit categories (e.g., ⚡ for performance, 🛡️ for security, 🧹 for clean code).
+    Return JSON ONLY.
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3-pro-preview",
+      contents: `Audit this code: \n\n${userCode}\n\nContext: ${context || 'None'}`,
+      config: {
+        systemInstruction,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            efficiencyScore: { type: Type.NUMBER },
+            bigO: { type: Type.STRING },
+            architecturalReview: { type: Type.STRING },
+            suggestedImprovements: { type: Type.ARRAY, items: { type: Type.STRING } },
+            isProductionReady: { type: Type.BOOLEAN },
+            securityNotes: { type: Type.STRING },
+            visualizationData: { 
+              type: Type.ARRAY, 
+              items: { 
+                type: Type.OBJECT,
+                properties: {
+                  epoch: { type: Type.NUMBER },
+                  loss: { type: Type.NUMBER },
+                  accuracy: { type: Type.NUMBER }
+                }
+              }
+            }
+          },
+          required: ["efficiencyScore", "bigO", "architecturalReview", "isProductionReady", "suggestedImprovements"]
+        }
+      }
+    });
+    return JSON.parse(response.text || '{}') as SandboxAudit;
+  } catch (error) {
+    console.error("Sandbox audit failed:", error);
+    throw error;
+  }
+};
+
+export const chatWithAura = async (message: string, context?: string, personalization?: UserPersonalization): Promise<string> => {
+  try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const systemInstruction = `
+      You are Aura, the lead AI mentor and pair programmer for PyQuest. 
+      CONVERSATION STYLE: 
+      - Friendly, approachable, and intellectually curious. 
+      - Similar to a senior engineer at a top tech firm mentoring a junior.
+      - Use emojis occasionally but appropriately (💡, 🚀, 🐍, 🧠).
+      - NEVER output a giant wall of text. 
+      - Break your answers down into clear sections using Markdown headers.
+      - Use bold text for key terms.
+      - If explaining code, use code blocks with comments.
+      
+      CORE MISSION: 
+      Your goal is to make Machine Learning feel accessible and exciting. If a user is stuck, don't just give the answer; provide a hint or an analogy first. 
+      ${personalization ? `USER PROFILE: Focus: ${personalization.focus}, Ambition: ${personalization.ambition}. Connect your advice to their goal of becoming a ${personalization.ambition}.` : ''}
+      
+      If the user says something irrelevant or playful, lean into it with wit and then gently guide them back to engineering.
+    `;
+    
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: message,
+      config: { systemInstruction }
+    });
+    
+    return response.text || "Neural connection weak. 📡 I didn't quite catch that—could you repeat?";
+  } catch (error) {
+    console.error("Aura Chat Error:", error);
+    return "Kernel error. 🛠️ My logic processors are rebooting. One moment!";
+  }
+};
+
+export const getAIHint = async (questTitle: string, objective: string, code: string): Promise<string> => {
+  try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const response = await ai.models.generateContent({ 
+      model: "gemini-3-flash-preview",
+      contents: `Quest: ${questTitle}. Objective: ${objective}. Current Code: ${code}. Provide a short, friendly socratic hint (max 30 words) with one relevant emoji.`
+    });
+    return response.text?.trim() || "Analyze your mathematical operations. 🔢";
+  } catch (error) {
+    return "The mentor is momentarily offline. 🔌";
+  }
+};
+
+export const generateSandboxDataset = async (prompt: string, codeContext: string): Promise<SyntheticDataset> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const systemInstruction = `
+    You are the 'PyQuest Data Synthesizer'. Generate realistic synthetic datasets for testing ML code.
+    Based on the user's prompt and code context, create a dataset in CSV or JSON format.
+    Return JSON ONLY with 'data' as a string containing the actual dataset content.
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: `Generate a dataset for: ${prompt}. Relevant code context: ${codeContext}`,
+      config: {
+        systemInstruction,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            name: { type: Type.STRING },
+            description: { type: Type.STRING },
+            data: { type: Type.STRING },
+            format: { type: Type.STRING, description: "Must be 'csv' or 'json'" }
+          },
+          required: ["name", "data", "format"]
+        }
+      }
+    });
+    return JSON.parse(response.text || '{}') as SyntheticDataset;
+  } catch (error) {
+    console.error("Dataset generation failed:", error);
+    throw error;
   }
 };
 
@@ -133,42 +267,6 @@ export const generatePersonalizedProfile = async (
   } catch (error) {
     console.error("Profile generation failed:", error);
     throw error;
-  }
-};
-
-export const chatWithAura = async (message: string, context?: string, personalization?: UserPersonalization): Promise<string> => {
-  try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const systemInstruction = `
-      You are Aura, the elite AI Mentor for PyQuest. You are technical but empathetic.
-      The student might be a complete beginner. Explain concepts using analogies when needed.
-      ${personalization ? `USER PROFILE: Focus: ${personalization.focus}, Ambition: ${personalization.ambition}. Tailor your advice to help them reach this goal.` : ''}
-      Use Markdown for code snippets.
-    `;
-    
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: message,
-      config: { systemInstruction }
-    });
-    
-    return response.text || "Neural connection weak. Please repeat transmission.";
-  } catch (error) {
-    console.error("Aura Chat Error:", error);
-    return "Kernel error. My logic processors are rebooting.";
-  }
-};
-
-export const getAIHint = async (questTitle: string, objective: string, code: string): Promise<string> => {
-  try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const response = await ai.models.generateContent({ 
-      model: "gemini-3-flash-preview",
-      contents: `Quest: ${questTitle}. Objective: ${objective}. Current Code: ${code}. Provide a short socratic hint (max 30 words).`
-    });
-    return response.text?.trim() || "Analyze your mathematical operations.";
-  } catch (error) {
-    return "The mentor is momentarily offline.";
   }
 };
 
