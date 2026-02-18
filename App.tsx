@@ -40,6 +40,22 @@ const App: React.FC = () => {
   const [interestInput, setInterestInput] = useState('');
 
   useEffect(() => {
+    // Check for API Key if in AI Studio environment
+    const checkApiKey = async () => {
+      if (window.aistudio && typeof window.aistudio.hasSelectedApiKey === 'function') {
+        const hasKey = await window.aistudio.hasSelectedApiKey();
+        if (!hasKey) {
+          setNotification({
+            title: "AI Core Offline",
+            message: "Please select your Gemini API key to activate Aura.",
+            icon: "🔑"
+          });
+          await window.aistudio.openSelectKey();
+        }
+      }
+    };
+    checkApiKey();
+
     const activeUser = db.getSession();
     if (activeUser) {
       setUser(activeUser);
