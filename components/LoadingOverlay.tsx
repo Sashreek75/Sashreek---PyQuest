@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface LoadingOverlayProps {
@@ -45,9 +44,9 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ message, subMessage }) 
 
         <div className="grid grid-cols-2 gap-4">
           <div className="text-left font-mono text-[8px] text-slate-700 space-y-1">
-            <div>> CALL_AURA_KERNEL</div>
-            <div>> AUTH_SECURE_LINK</div>
-            <div>> STATUS: OK</div>
+            <div>&gt; CALL_AURA_KERNEL</div>
+            <div>&gt; AUTH_SECURE_LINK</div>
+            <div>&gt; STATUS: OK</div>
           </div>
           <div className="text-right font-mono text-[8px] text-slate-700 space-y-1">
             <div>BUFFERING_TENSORS...</div>
