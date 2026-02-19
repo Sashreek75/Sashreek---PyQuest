@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { QUESTS, INITIAL_ACHIEVEMENTS } from './constants';
 import { Quest, Progress, CodeEvaluation, UserStats, User, RoadmapData, UserPersonalization, QuestCategory, ActivityRecord } from './types';
 import QuestCard from './components/QuestCard';
@@ -37,11 +37,11 @@ const App: React.FC = () => {
   const [code, setCode] = useState('');
   const [evaluation, setEvaluation] = useState<CodeEvaluation | null>(null);
   const [aiHint, setAiHint] = useState<string | null>(null);
-  
   const [interestInput, setInterestInput] = useState('');
 
+  const editorTextareaRef = useRef<HTMLTextAreaElement>(null);
+
   useEffect(() => {
-    // Check for API Key if in AI Studio environment
     const checkApiKey = async () => {
       const aistudio = window.aistudio;
       if (aistudio && typeof aistudio.hasSelectedApiKey === 'function') {
@@ -66,7 +66,6 @@ const App: React.FC = () => {
       const savedProgress = db.getProgress(activeUser.id);
       if (savedProgress) {
         setProgress(savedProgress);
-        // If they have personalization or have finished quests, go to dashboard
         const hasFinishedOnboarding = !!savedProgress.personalization || savedProgress.completedQuests.length > 0;
         setView(hasFinishedOnboarding ? 'Dashboard' : 'Personalization');
       } else {
@@ -315,7 +314,7 @@ const App: React.FC = () => {
               <div className="flex items-center gap-8">
                 <button onClick={() => setView('Academy')} className="text-slate-500 hover:text-white transition-all group flex items-center gap-3">
                   <span className="group-hover:-translate-x-1 transition-transform font-black text-xl">←</span>
-                  <span className="text-[10px] font-bold uppercase tracking-widest italic">Academy</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest italic hidden sm:inline">Academy</span>
                 </button>
                 <div className="h-4 w-px bg-slate-800" />
                 <h2 className="text-xl font-black text-white uppercase tracking-tighter italic leading-none">{currentQuest.title}</h2>
@@ -330,20 +329,21 @@ const App: React.FC = () => {
             </header>
 
             <div className="flex-1 flex overflow-hidden">
-              {/* Left Side: Lesson (The Odin Project Style) */}
               <div className="flex-1 overflow-y-auto border-r border-white/5 custom-scroll bg-[#05070d]/30">
                 <div className="max-w-4xl mx-auto px-12 py-20">
                   <LessonContent 
                     introduction={currentQuest.lesson.introduction} 
                     sections={currentQuest.lesson.sections} 
-                    summary={currentQuest.lesson.summary} 
+                    summary={currentQuest.lesson.summary}
+                    onReadyForChallenge={() => {
+                        editorTextareaRef.current?.focus();
+                        editorTextareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }}
                   />
                 </div>
               </div>
 
-              {/* Right Side: Challenge (Codecademy Style) */}
               <div className="flex-1 flex flex-col bg-[#010208]">
-                {/* Editor Container */}
                 <div className="flex-1 flex flex-col overflow-hidden relative">
                    <div className="px-10 py-5 bg-[#0b0e14] border-b border-white/5 flex items-center justify-between shrink-0">
                       <div className="flex items-center gap-3">
@@ -358,11 +358,11 @@ const App: React.FC = () => {
                    </div>
                    
                    <textarea 
+                    ref={editorTextareaRef}
                     value={code} onChange={(e) => setCode(e.target.value)} spellCheck={false}
                     className="flex-1 w-full p-12 bg-transparent text-indigo-100 font-mono text-xl focus:outline-none resize-none leading-relaxed code-font selection:bg-indigo-500/30"
                   />
 
-                  {/* Objective Overlay (Sticky at bottom) */}
                   <div className="p-10 bg-[#0b0e14] border-t border-white/5 shadow-2xl">
                     <div className="space-y-4">
                       <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em]">Active Objective</span>
@@ -379,7 +379,6 @@ const App: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Audit Results Overlay (Appears only on scroll/action) */}
                 {(evaluation || aiHint) && (
                   <div className="h-[400px] border-t border-white/5 bg-[#05070d] p-10 overflow-y-auto custom-scroll animate-in slide-in-from-bottom-full duration-500">
                     <div className="max-w-4xl mx-auto space-y-10">
