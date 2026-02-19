@@ -1,5 +1,5 @@
 
-import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { CodeEvaluation, RoadmapData, UserPersonalization, SandboxAudit, SyntheticDataset } from "../types";
 
 // Utility to safely extract and parse JSON from model responses
@@ -23,14 +23,16 @@ const safeJsonParse = (text: string | undefined) => {
   }
 };
 
-// Helper to handle AI Studio key selection race conditions and errors
+// Helper to handle AI Studio key selection
+// Always use new GoogleGenAI({apiKey: process.env.API_KEY})
 const getAiClient = () => {
   return new GoogleGenAI({ apiKey: process.env.API_KEY });
 };
 
 const handleApiError = async (error: any) => {
   console.error("Gemini API Error:", error);
-  if (error?.message?.includes("Requested entity was not found") || error?.status === 404) {
+  // If the error indicates a missing key or is a 404/401, prompt for key
+  if (error?.message?.includes("Requested entity was not found") || error?.status === 404 || error?.status === 401) {
     if (window.aistudio && typeof window.aistudio.openSelectKey === 'function') {
       await window.aistudio.openSelectKey();
     }
@@ -61,6 +63,7 @@ export const evaluateQuestCode = async (
   `;
 
   try {
+    // Using gemini-3-pro-preview for complex reasoning and code evaluation
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
       contents: prompt,
@@ -70,7 +73,7 @@ export const evaluateQuestCode = async (
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            status: { type: Type.STRING, enum: ["success", "partial", "error"] },
+            status: { type: Type.STRING },
             feedback: { type: Type.STRING },
             technicalDetails: { type: Type.STRING },
             mentorAdvice: { type: Type.STRING },
@@ -122,6 +125,7 @@ export const auditSandboxCode = async (userCode: string, context?: string): Prom
   `;
 
   try {
+    // Using gemini-3-pro-preview for architectural audit
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
       contents: `Audit this code: \n\n${userCode}\n\nContext: ${context || 'None'}`,
@@ -169,6 +173,7 @@ export const chatWithAura = async (message: string, context?: string, personaliz
       ${personalization ? `USER: Focus: ${personalization.focus}, Ambition: ${personalization.ambition}.` : ''}
     `;
     
+    // Using gemini-3-flash-preview for general text-based chat
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: message,
@@ -185,6 +190,7 @@ export const chatWithAura = async (message: string, context?: string, personaliz
 export const getAIHint = async (questTitle: string, objective: string, code: string): Promise<string> => {
   try {
     const ai = getAiClient();
+    // Using gemini-3-flash-preview for hints
     const response = await ai.models.generateContent({ 
       model: "gemini-3-flash-preview",
       contents: `Quest: ${questTitle}. Objective: ${objective}. Code: ${code}. Short Socratic hint (max 25 words).`
@@ -201,6 +207,7 @@ export const generateSandboxDataset = async (prompt: string, codeContext: string
   const systemInstruction = `You are the 'PyQuest Data Synthesizer'. Return JSON ONLY with 'data' as string.`;
 
   try {
+    // Using gemini-3-flash-preview for synthetic data generation
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `Generate dataset for: ${prompt}. Context: ${codeContext}`,
@@ -236,8 +243,9 @@ export const generatePersonalizedProfile = async (
   const systemInstruction = `You are the 'PyQuest Neural Profiler'. Translate beginner desires into trajectories. Return JSON ONLY.`;
 
   try {
+    // Using gemini-3-flash-preview for personalization tasks
     const response = await ai.models.generateContent({
-      model: "gemini-3-pro-preview",
+      model: "gemini-3-flash-preview",
       contents: `Interests: ${rawInterests}, Goal: ${rawGoal}, Level: ${rawProficiency}, Style: ${rawWorkStyle}`,
       config: {
         systemInstruction,
@@ -281,8 +289,9 @@ export const generateCareerStrategy = async (
   const systemInstruction = `You are the 'PyQuest Strategic Architect'. Visual tech roadmap. Return JSON ONLY.`;
 
   try {
+    // Using gemini-3-flash-preview for complex text generation task
     const response = await ai.models.generateContent({
-      model: "gemini-3-pro-preview",
+      model: "gemini-3-flash-preview",
       contents: `Interest: ${interest}. Completed: ${completedQuestIds.join(', ')}`,
       config: {
         systemInstruction,

@@ -179,3 +179,21 @@ export interface SyntheticDataset {
   data: string;
   format: 'csv' | 'json';
 }
+
+declare global {
+  // Defined AIStudio interface to resolve type mismatch on Window
+  interface AIStudio {
+    hasSelectedApiKey: () => Promise<boolean>;
+    openSelectKey: () => Promise<void>;
+  }
+
+  interface Window {
+    aistudio?: AIStudio;
+  }
+
+  namespace NodeJS {
+    interface ProcessEnv {
+      API_KEY: string;
+    }
+  }
+}

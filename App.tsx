@@ -43,15 +43,18 @@ const App: React.FC = () => {
   useEffect(() => {
     // Check for API Key if in AI Studio environment
     const checkApiKey = async () => {
-      if (window.aistudio && typeof window.aistudio.hasSelectedApiKey === 'function') {
-        const hasKey = await window.aistudio.hasSelectedApiKey();
+      const aistudio = window.aistudio;
+      if (aistudio && typeof aistudio.hasSelectedApiKey === 'function') {
+        const hasKey = await aistudio.hasSelectedApiKey();
         if (!hasKey) {
           setNotification({
             title: "AI Core Offline",
             message: "Please select your Gemini API key to activate Aura.",
             icon: "🔑"
           });
-          await window.aistudio.openSelectKey();
+          if (typeof aistudio.openSelectKey === 'function') {
+            await aistudio.openSelectKey();
+          }
         }
       }
     };
@@ -63,7 +66,9 @@ const App: React.FC = () => {
       const savedProgress = db.getProgress(activeUser.id);
       if (savedProgress) {
         setProgress(savedProgress);
-        setView(savedProgress.personalization || savedProgress.completedQuests.length > 0 ? 'Dashboard' : 'Personalization');
+        // If they have personalization or have finished quests, go to dashboard
+        const hasFinishedOnboarding = !!savedProgress.personalization || savedProgress.completedQuests.length > 0;
+        setView(hasFinishedOnboarding ? 'Dashboard' : 'Personalization');
       } else {
         loadUserProgress(activeUser.id);
       }
@@ -74,7 +79,8 @@ const App: React.FC = () => {
     const savedProgress = db.getProgress(userId);
     if (savedProgress) {
       setProgress(savedProgress);
-      setView(savedProgress.personalization || savedProgress.completedQuests.length > 0 ? 'Dashboard' : 'Personalization');
+      const hasFinishedOnboarding = !!savedProgress.personalization || savedProgress.completedQuests.length > 0;
+      setView(hasFinishedOnboarding ? 'Dashboard' : 'Personalization');
     } else {
       const initial: Progress = {
         userId,
