@@ -11,6 +11,36 @@ export type QuestCategory =
   | 'LLM & Transformers'
   | 'MLOps & Deployment';
 
+export interface LessonSection {
+  id: string;
+  type: 'text' | 'code-demo' | 'callout' | 'knowledge-check' | 'heading';
+  title?: string;
+  content: string;
+  variant?: 'pro-tip' | 'warning' | 'info'; // For callouts
+  snippet?: string; // For code-demos
+}
+
+export interface Quest {
+  id: string;
+  title: string;
+  category: QuestCategory;
+  difficulty: Difficulty;
+  description: string;
+  lesson: {
+    introduction: string;
+    sections: LessonSection[];
+    summary: string;
+  };
+  objective: string;
+  startingCode: string;
+  solutionHint: string;
+  topics: string[];
+  estimatedMinutes: number;
+  xpReward: number;
+  quiz: QuizQuestion[];
+  technicalPrerequisites: string[];
+}
+
 export interface QuizQuestion {
   question: string;
   options: string[];
@@ -36,23 +66,6 @@ export interface UserPersonalization {
   targetHardware: string;
   aiDirective: string;
   summary: string;
-}
-
-export interface Quest {
-  id: string;
-  title: string;
-  category: QuestCategory;
-  difficulty: Difficulty;
-  description: string;
-  longDescription: string;
-  objective: string;
-  startingCode: string;
-  solutionHint: string;
-  topics: string[];
-  estimatedMinutes: number;
-  xpReward: number;
-  quiz: QuizQuestion[];
-  technicalPrerequisites: string[];
 }
 
 export interface User {
@@ -130,7 +143,6 @@ export interface Progress {
   achievements: Achievement[];
   dailyLoginCount: number;
   personalization?: UserPersonalization;
-  // Real tracking data
   activityLog: ActivityRecord[];
   topicXP: Record<string, number>;
 }

@@ -16,6 +16,7 @@ import PersonalizationQuiz from './components/PersonalizationQuiz';
 import Sandbox from './components/Sandbox';
 import KnowledgeGraph from './components/KnowledgeGraph';
 import Profile from './components/Profile';
+import LessonContent from './components/LessonContent';
 import { evaluateQuestCode, getAIHint, generateCareerStrategy } from './services/geminiService';
 import { db } from './services/dbService';
 
@@ -270,7 +271,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#010208] text-slate-200">
-      {(view !== 'Dashboard' && view !== 'Brain' && view !== 'Profile') && renderSimpleNav()}
+      {(view !== 'Dashboard' && view !== 'Brain' && view !== 'Profile' && view !== 'Quest') && renderSimpleNav()}
       <main className="w-full">
         {view === 'Dashboard' && user && progress && (
           <Dashboard 
@@ -303,55 +304,101 @@ const App: React.FC = () => {
           </div>
         )}
         {view === 'Quest' && currentQuest && (
-          <div className="max-w-[1800px] mx-auto px-12 py-24 grid grid-cols-1 lg:grid-cols-12 gap-20 animate-in fade-in duration-700">
-            <div className="lg:col-span-4 space-y-16">
-              <button onClick={() => setView('Academy')} className="flex items-center gap-6 text-slate-600 hover:text-white font-black text-[12px] uppercase tracking-widest transition-all group italic">
-                <span className="group-hover:-translate-x-2 transition-transform text-xl">←</span> 
-                Back to Academy
-              </button>
-              <div className="bg-[#0b0e14] border border-white/5 rounded-[80px] p-20 space-y-12 shadow-3xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 blur-[100px] -z-10 group-hover:bg-indigo-500/10 transition-all"></div>
-                <h2 className="text-6xl font-black text-white uppercase tracking-tighter leading-none italic">{currentQuest.title}</h2>
-                <p className="text-2xl text-slate-400 leading-relaxed font-medium">{currentQuest.longDescription}</p>
-                <div className="p-12 bg-indigo-600/5 border border-indigo-500/20 rounded-[48px]">
-                  <span className="text-[11px] font-black text-indigo-400 uppercase tracking-[0.6em]">Module Goal</span>
-                  <p className="text-white text-2xl font-bold mt-6 leading-tight uppercase italic">{currentQuest.objective}</p>
+          <div className="h-screen flex flex-col overflow-hidden bg-[#010208]">
+            <header className="h-20 border-b border-white/5 px-12 flex items-center justify-between shrink-0 bg-[#010208]/90 backdrop-blur-xl">
+              <div className="flex items-center gap-8">
+                <button onClick={() => setView('Academy')} className="text-slate-500 hover:text-white transition-all group flex items-center gap-3">
+                  <span className="group-hover:-translate-x-1 transition-transform font-black text-xl">←</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest italic">Academy</span>
+                </button>
+                <div className="h-4 w-px bg-slate-800" />
+                <h2 className="text-xl font-black text-white uppercase tracking-tighter italic leading-none">{currentQuest.title}</h2>
+              </div>
+              <div className="flex items-center gap-10">
+                <div className="flex flex-col items-end">
+                  <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Reward</span>
+                  <span className="text-indigo-400 text-xs font-black">+{currentQuest.xpReward} XP</span>
+                </div>
+                <button onClick={handleLogout} className="text-rose-500 hover:text-rose-400 font-black text-[10px] uppercase tracking-widest">Abort</button>
+              </div>
+            </header>
+
+            <div className="flex-1 flex overflow-hidden">
+              {/* Left Side: Lesson (The Odin Project Style) */}
+              <div className="flex-1 overflow-y-auto border-r border-white/5 custom-scroll bg-[#05070d]/30">
+                <div className="max-w-4xl mx-auto px-12 py-20">
+                  <LessonContent 
+                    introduction={currentQuest.lesson.introduction} 
+                    sections={currentQuest.lesson.sections} 
+                    summary={currentQuest.lesson.summary} 
+                  />
                 </div>
               </div>
-            </div>
-            <div className="lg:col-span-8 space-y-12">
-              <div className="bg-[#0b0e14] rounded-[80px] border border-white/5 overflow-hidden flex flex-col h-[850px] shadow-3xl">
-                <div className="bg-[#05070d] px-14 py-7 border-b border-white/5 flex justify-between items-center">
-                  <div className="flex items-center gap-4">
-                    <div className="w-3 h-3 rounded-full bg-rose-500/20"></div>
-                    <div className="w-3 h-3 rounded-full bg-emerald-500/20"></div>
-                    <span className="text-[11px] font-black text-slate-600 uppercase tracking-widest ml-4">editor.py</span>
+
+              {/* Right Side: Challenge (Codecademy Style) */}
+              <div className="flex-1 flex flex-col bg-[#010208]">
+                {/* Editor Container */}
+                <div className="flex-1 flex flex-col overflow-hidden relative">
+                   <div className="px-10 py-5 bg-[#0b0e14] border-b border-white/5 flex items-center justify-between shrink-0">
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 rounded-full bg-rose-500/20"></div>
+                        <div className="w-3 h-3 rounded-full bg-emerald-500/20"></div>
+                        <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-4">challenge.py</span>
+                      </div>
+                      <div className="flex gap-4">
+                        <button onClick={async () => setAiHint(await getAIHint(currentQuest.title, currentQuest.objective, code))} className="text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest italic">Hint</button>
+                        <button onClick={() => setIsAuraOpen(true)} className="text-[10px] font-black text-indigo-500 hover:text-white uppercase tracking-widest italic">Consult Aura</button>
+                      </div>
+                   </div>
+                   
+                   <textarea 
+                    value={code} onChange={(e) => setCode(e.target.value)} spellCheck={false}
+                    className="flex-1 w-full p-12 bg-transparent text-indigo-100 font-mono text-xl focus:outline-none resize-none leading-relaxed code-font selection:bg-indigo-500/30"
+                  />
+
+                  {/* Objective Overlay (Sticky at bottom) */}
+                  <div className="p-10 bg-[#0b0e14] border-t border-white/5 shadow-2xl">
+                    <div className="space-y-4">
+                      <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em]">Active Objective</span>
+                      <p className="text-xl font-bold text-white uppercase italic leading-tight">{currentQuest.objective}</p>
+                    </div>
+                    <div className="mt-8 flex justify-end">
+                      <button 
+                        onClick={handleRunCode} 
+                        className="px-12 py-5 bg-white text-black rounded-[24px] font-black uppercase text-xs tracking-widest active:scale-95 shadow-3xl transition-all hover:bg-indigo-50 italic"
+                      >
+                        Verify Logic →
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <textarea 
-                  value={code} onChange={(e) => setCode(e.target.value)} spellCheck={false}
-                  className="flex-1 w-full p-20 bg-[#010208] text-indigo-100 font-mono text-2xl focus:outline-none resize-none leading-relaxed"
-                />
-                <div className="p-14 bg-slate-900/50 flex flex-col md:flex-row justify-between items-center gap-8 border-t border-white/5">
-                  <div className="flex gap-12">
-                    <button onClick={async () => setAiHint(await getAIHint(currentQuest.title, currentQuest.objective, code))} className="text-[12px] font-black text-slate-500 hover:text-white uppercase tracking-widest transition-colors italic">Get a Hint</button>
-                    <button onClick={() => setIsAuraOpen(true)} className="text-[12px] font-black text-indigo-500 hover:text-indigo-400 uppercase tracking-widest transition-colors italic">Consult Aura</button>
+
+                {/* Audit Results Overlay (Appears only on scroll/action) */}
+                {(evaluation || aiHint) && (
+                  <div className="h-[400px] border-t border-white/5 bg-[#05070d] p-10 overflow-y-auto custom-scroll animate-in slide-in-from-bottom-full duration-500">
+                    <div className="max-w-4xl mx-auto space-y-10">
+                      {aiHint && (
+                        <div className="p-8 bg-indigo-600/10 border border-indigo-500/20 rounded-[32px] text-center italic text-xl text-indigo-200">
+                          "{aiHint}"
+                        </div>
+                      )}
+                      {evaluation && (
+                        <div className="space-y-10">
+                          <div className="flex items-center justify-between">
+                            <h3 className={`text-3xl font-black uppercase tracking-tighter italic ${evaluation.status === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              {evaluation.status === 'success' ? '✓ Kernel Verified' : '⚠ Logical Error'}
+                            </h3>
+                          </div>
+                          <p className="text-xl text-slate-400 font-medium leading-relaxed italic">"{evaluation.feedback}"</p>
+                          <div className="h-[350px] w-full"><Visualizer data={evaluation.visualizationData || []} /></div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <button onClick={handleRunCode} className="px-16 py-6 bg-white text-black rounded-3xl font-black uppercase text-sm tracking-widest active:scale-95 shadow-3xl transition-all hover:bg-indigo-50 italic">Verify Code</button>
-                </div>
+                )}
               </div>
-              {aiHint && <div className="bg-indigo-600/10 border border-indigo-500/20 p-12 rounded-[48px] text-center italic text-3xl text-indigo-200 animate-in slide-in-from-top-4">"{aiHint}"</div>}
-              {evaluation && (
-                <div className="bg-[#0b0e14] border border-white/5 rounded-[80px] p-20 space-y-12 animate-in fade-in zoom-in duration-700 shadow-3xl">
-                  <div className="flex items-center justify-between">
-                    <h3 className={`text-4xl font-black uppercase tracking-tighter italic ${evaluation.status === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>{evaluation.status === 'success' ? 'Logic Valid' : 'Check Code'}</h3>
-                    <div className={`px-6 py-2 rounded-full text-[11px] font-black uppercase tracking-widest ${evaluation.status === 'success' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>Review_{evaluation.status}</div>
-                  </div>
-                  <p className="text-2xl text-slate-400 font-medium leading-relaxed italic">"{evaluation.feedback}"</p>
-                  <div className="h-[450px] w-full"><Visualizer data={evaluation.visualizationData || []} /></div>
-                </div>
-              )}
             </div>
+
             {showQuiz && <QuizOverlay questions={currentQuest.quiz} onComplete={handleQuizComplete} onClose={() => setShowQuiz(false)} />}
           </div>
         )}
@@ -385,6 +432,8 @@ const App: React.FC = () => {
       <style>{`
         @keyframes neural-drift { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
         .animate-neural { animation: neural-drift 30s infinite ease-in-out; }
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
       `}</style>
     </div>
   );

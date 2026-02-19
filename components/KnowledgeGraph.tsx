@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { Progress, QuestCategory } from '../types';
 import { QUESTS } from '../constants';
@@ -125,8 +126,10 @@ const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ progress, onBack, onSel
   }, [progress.completedQuests]);
 
   const totalProgress = useMemo(() => {
-    const total = Object.values(stats).reduce((acc, s) => acc + s.total, 0);
-    const completed = Object.values(stats).reduce((acc, s) => acc + s.completed, 0);
+    // Explicitly cast Object.values results to ensure type safety and fix 'unknown' property access errors.
+    const statsValues = Object.values(stats) as { total: number; completed: number; percent: number }[];
+    const total = statsValues.reduce((acc, s) => acc + s.total, 0);
+    const completed = statsValues.reduce((acc, s) => acc + s.completed, 0);
     return total > 0 ? (completed / total) * 100 : 0;
   }, [stats]);
 

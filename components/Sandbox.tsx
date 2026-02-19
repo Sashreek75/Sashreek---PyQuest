@@ -1,10 +1,30 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { auditSandboxCode, generateSandboxDataset } from '../services/geminiService';
 import { SandboxAudit, SyntheticDataset, UserPersonalization } from '../types';
 import LoadingOverlay from './LoadingOverlay';
 import Visualizer from './Visualizer';
 
+const CHALLENGES = [
+  { id: 1, label: 'Sort Attack', difficulty: 'Novice', prompt: '# Challenge: Implement merge sort from scratch\n# Bonus: Add a step counter\n\ndef merge_sort(arr):\n    pass\n\nprint(merge_sort([5, 2, 8, 1, 9, 3]))' },
+  { id: 2, label: 'Graph Maze', difficulty: 'Intermediate', prompt: '# Challenge: Implement BFS to find shortest path\n# in a 2D grid (0=open, 1=wall)\n\ndef bfs_shortest_path(grid, start, end):\n    pass\n\ngrid = [\n    [0,0,0,1,0],\n    [1,1,0,1,0],\n    [0,0,0,0,0],\n    [0,1,1,1,0],\n    [0,0,0,0,0]\n]\nprint(bfs_shortest_path(grid, (0,0), (4,4)))' },
+  { id: 3, label: 'Neural Init', difficulty: 'Advanced', prompt: '# Challenge: Initialize and forward pass a mini MLP\n# Layers: [input=4, hidden=8, output=2]\n# Use Xavier init and sigmoid activation\n\nimport numpy as np\n\nclass MiniMLP:\n    def __init__(self, layer_sizes):\n        pass\n    \n    def forward(self, x):\n        pass\n\nmlp = MiniMLP([4, 8, 2])\nx = np.random.randn(4)\nprint(mlp.forward(x))' },
+  { id: 4, label: 'Fibonacci Cache', difficulty: 'Novice', prompt: '# Challenge: Fibonacci with memoization\n# Compare recursive vs memoized performance\n\nimport time\n\ndef fib_memo(n, memo={}):\n    pass\n\ndef fib_naive(n):\n    pass\n\n# Time both for n=35\nprint(fib_memo(35))\nprint(fib_naive(35))' },
+];
+
+const MINI_PROJECTS = [
+  { id: 1, label: 'Kalman Filter', icon: '📡', template: '# Mini Project: 1D Kalman Filter\nimport numpy as np\n\nclass KalmanFilter1D:\n    def __init__(self, process_variance, measurement_variance):\n        self.q = process_variance\n        self.r = measurement_variance\n        self.x = 0.0  # estimated state\n        self.p = 1.0  # estimation error covariance\n    \n    def update(self, measurement):\n        # Prediction step\n        # TODO: implement prediction\n        \n        # Update step\n        # TODO: implement Kalman gain and state update\n        pass\n\nkf = KalmanFilter1D(1e-5, 0.1**2)\nmeasurements = [0.39, 0.50, 0.48, 0.29, 0.25]\nfor z in measurements:\n    kf.update(z)\n    print(f"Measurement: {z:.3f} -> Estimate: {kf.x:.3f}")' },
+  { id: 2, label: 'Gradient Descent', icon: '⛰️', template: '# Mini Project: Gradient Descent from scratch\nimport numpy as np\n\ndef cost_function(theta, X, y):\n    m = len(y)\n    predictions = X @ theta\n    cost = (1/(2*m)) * np.sum((predictions - y)**2)\n    return cost\n\ndef gradient_descent(X, y, theta, alpha, iterations):\n    m = len(y)\n    cost_history = []\n    \n    for i in range(iterations):\n        # TODO: compute gradient and update theta\n        pass\n    \n    return theta, cost_history\n\n# Generate synthetic linear data\nnp.random.seed(42)\nX = np.c_[np.ones(100), np.random.randn(100)]\ny = 3 + 2 * X[:,1] + np.random.randn(100) * 0.5\ntheta = np.zeros(2)\ntheta, history = gradient_descent(X, y, theta, 0.01, 1000)\nprint(f"Learned params: {theta}")' },
+  { id: 3, label: 'Decision Tree', icon: '🌲', template: '# Mini Project: Decision Tree (single split)\nimport numpy as np\nfrom collections import Counter\n\nclass SimpleDecisionTree:\n    def __init__(self, max_depth=3):\n        self.max_depth = max_depth\n        self.tree = None\n    \n    def gini(self, y):\n        # TODO: compute Gini impurity\n        pass\n    \n    def best_split(self, X, y):\n        # TODO: find best feature and threshold\n        pass\n    \n    def fit(self, X, y):\n        self.tree = self._build(X, y, depth=0)\n    \n    def _build(self, X, y, depth):\n        # TODO: recursively build the tree\n        pass\n    \n    def predict(self, X):\n        pass\n\n# Test on XOR problem\nX = np.array([[0,0],[0,1],[1,0],[1,1]])\ny = np.array([0, 1, 1, 0])\ntree = SimpleDecisionTree()\ntree.fit(X, y)\nprint(tree.predict(X))' },
+];
+
+const DIFFICULTY_COLORS: Record<string, string> = {
+  Novice: '#22d3ee',
+  Intermediate: '#f59e0b',
+  Advanced: '#f43f5e',
+};
+
+// Define SandboxProps to fix the "Cannot find name 'SandboxProps'" error
 interface SandboxProps {
   personalization?: UserPersonalization;
   onBack: () => void;
@@ -12,17 +32,135 @@ interface SandboxProps {
 }
 
 const Sandbox: React.FC<SandboxProps> = ({ personalization, onBack, onOpenAura }) => {
-  const [code, setCode] = useState(`# Enter any Python/ML code for a professional audit\nimport numpy as np\n\ndef neural_forward(x, w, b):\n    return np.dot(x, w) + b\n\n# Request an audit below`);
+  const [code, setCode] = useState(`# Welcome to the Neural Sandbox\n# Experiment, explore, and build freely.\n\nimport numpy as np\n\ndef neural_forward(x, w, b):\n    """Single-layer forward pass"""\n    return np.dot(x, w) + b\n\n# Try something:\nx = np.array([1.0, 2.0, 3.0])\nw = np.random.randn(3, 4)\nb = np.zeros(4)\noutput = neural_forward(x, w, b)\nprint("Output shape:", output.shape)\nprint("Values:", output)`);
+  
   const [audit, setAudit] = useState<SandboxAudit | null>(null);
   const [dataset, setDataset] = useState<SyntheticDataset | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [datasetPrompt, setDatasetPrompt] = useState('');
-  const [activeTab, setActiveTab] = useState<'Audit' | 'Data'>('Audit');
+  const [activeTab, setActiveTab] = useState<'Audit' | 'Data' | 'Challenges' | 'Projects'>('Audit');
+  const [activeChallengeId, setActiveChallengeId] = useState<number | null>(null);
+  const [activeProjectId, setActiveProjectId] = useState<number | null>(null);
+  const [glitchActive, setGlitchActive] = useState(false);
+  const [scanlinePos, setScanlinePos] = useState(0);
+  
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animFrameRef = useRef<number>(0);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const lineNumbersRef = useRef<HTMLDivElement>(null);
+
+  const [lineCount, setLineCount] = useState(0);
+  const [charCount, setCharCount] = useState(0);
+
+  // Particle canvas background
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d')!;
+    
+    let nodes: {x: number; y: number; vx: number; vy: number}[] = [];
+    
+    const resize = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      initNodes();
+    };
+
+    const initNodes = () => {
+      nodes = Array.from({ length: 40 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+      }));
+    };
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      nodes.forEach((node, i) => {
+        node.x += node.vx;
+        node.y += node.vy;
+        if (node.x < 0 || node.x > canvas.width) node.vx *= -1;
+        if (node.y < 0 || node.y > canvas.height) node.vy *= -1;
+
+        nodes.forEach((other, j) => {
+          if (i >= j) return;
+          const dx = node.x - other.x;
+          const dy = node.y - other.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 160) {
+            const alpha = (1 - dist / 160) * 0.12;
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(99, 102, 241, ${alpha})`;
+            ctx.lineWidth = 1;
+            ctx.moveTo(node.x, node.y);
+            ctx.lineTo(other.x, other.y);
+            ctx.stroke();
+          }
+        });
+
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(99,102,241,0.25)';
+        ctx.fill();
+      });
+
+      animFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    resize();
+    window.addEventListener('resize', resize);
+    animate();
+    return () => {
+      window.removeEventListener('resize', resize);
+      cancelAnimationFrame(animFrameRef.current);
+    };
+  }, []);
+
+  // Scanline animation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setScanlinePos(prev => (prev + 1.2) % 100);
+    }, 16);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Sync scroll between textarea and line numbers
+  const handleScroll = () => {
+    if (textareaRef.current && lineNumbersRef.current) {
+      lineNumbersRef.current.scrollTop = textareaRef.current.scrollTop;
+    }
+  };
+
+  // Code stats
+  useEffect(() => {
+    const lines = code.split('\n').length;
+    const chars = code.replace(/\s/g, '').length;
+    setLineCount(lines);
+    setCharCount(chars);
+  }, [code]);
+
+  const triggerGlitch = () => {
+    setGlitchActive(true);
+    setTimeout(() => setGlitchActive(false), 600);
+  };
 
   const handleRequestAudit = async () => {
+    triggerGlitch();
     setIsLoading(true);
+    
+    let contextStr = "Free coding session.";
+    if (activeChallengeId) {
+      const challenge = CHALLENGES.find(c => c.id === activeChallengeId);
+      contextStr = `Challenge: ${challenge?.label}. Prompt: ${challenge?.prompt}`;
+    } else if (activeProjectId) {
+      const project = MINI_PROJECTS.find(p => p.id === activeProjectId);
+      contextStr = `Mini-Project: ${project?.label}. Objective: Build out the scaffold.`;
+    }
+
     try {
-      const result = await auditSandboxCode(code);
+      const result = await auditSandboxCode(code, contextStr);
       setAudit(result);
       setActiveTab('Audit');
     } catch (err) {
@@ -46,198 +184,396 @@ const Sandbox: React.FC<SandboxProps> = ({ personalization, onBack, onOpenAura }
     }
   };
 
+  const loadChallenge = (challenge: typeof CHALLENGES[0]) => {
+    setCode(challenge.prompt);
+    setActiveChallengeId(challenge.id);
+    setActiveProjectId(null);
+    triggerGlitch();
+  };
+
+  const loadProject = (project: typeof MINI_PROJECTS[0]) => {
+    setCode(project.template);
+    setActiveProjectId(project.id);
+    setActiveChallengeId(null);
+    triggerGlitch();
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    // Could add a toast here
+  };
+
   return (
-    <div className="min-h-screen bg-[#010208] text-slate-200 font-jakarta animate-in fade-in duration-700 overflow-hidden flex flex-col">
+    <div className="relative min-h-screen overflow-hidden" style={{ background: '#04050d', fontFamily: "'JetBrains Mono', 'Fira Code', monospace" }}>
       {isLoading && <LoadingOverlay message="Neural Kernel Processing" subMessage="Aura is analyzing your logical architecture..." />}
       
-      <header className="h-20 border-b border-white/5 px-12 flex items-center justify-between bg-[#010208]/90 backdrop-blur-xl z-40">
-        <div className="flex items-center gap-8">
-          <button onClick={onBack} className="text-slate-500 hover:text-white transition-colors group flex items-center gap-3">
-             <span className="group-hover:-translate-x-1 transition-transform">←</span>
-             <span className="text-[10px] font-bold uppercase tracking-widest">Repository</span>
-          </button>
-          <div className="h-4 w-px bg-slate-800" />
-          <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500">
-            Academy / <span className="text-indigo-400 italic">Neural_Sandbox_v1.0</span>
-          </div>
-        </div>
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.6 }} />
+
+      <div
+        className="absolute inset-0 pointer-events-none z-10"
+        style={{
+          background: `linear-gradient(to bottom, transparent ${scanlinePos - 1}%, rgba(99,102,241,0.03) ${scanlinePos}%, transparent ${scanlinePos + 1}%)`,
+        }}
+      />
+
+      <div className="absolute inset-0 pointer-events-none z-10" style={{
+        background: 'radial-gradient(ellipse at center, transparent 50%, rgba(2,3,12,0.7) 100%)'
+      }} />
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700;800&family=Syne:wght@400;500;600;700;800;900&display=swap');
         
-        <div className="flex items-center gap-6">
-          <button 
-            onClick={onOpenAura}
-            className="px-6 py-2 bg-indigo-600/10 border border-indigo-500/20 rounded-full text-[10px] font-bold text-indigo-400 uppercase tracking-widest hover:bg-indigo-600/20 transition-all shadow-[0_0_20px_rgba(79,70,229,0.1)]"
-          >
-            Consult Aura
-          </button>
+        :root {
+          --indigo: #6366f1;
+          --cyan: #22d3ee;
+          --rose: #f43f5e;
+          --amber: #f59e0b;
+          --green: #10b981;
+          --bg: #04050d;
+          --surface: rgba(10,12,28,0.8);
+          --border: rgba(99,102,241,0.12);
+        }
+
+        .syne { font-family: 'Syne', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        .glitch-text { animation: glitch 0.6s steps(2, end); }
+        @keyframes glitch {
+          0% { transform: translate(0); }
+          20% { transform: translate(-2px, 1px); }
+          40% { transform: translate(2px, -1px); }
+          60% { transform: translate(-1px, 2px); }
+          80% { transform: translate(1px, -2px); }
+          100% { transform: translate(0); }
+        }
+
+        .panel { background: var(--surface); border: 1px solid var(--border); backdrop-filter: blur(20px); }
+        .panel-glow { box-shadow: 0 0 0 1px rgba(99,102,241,0.08), 0 4px 40px rgba(0,0,0,0.6); }
+
+        .btn-audit {
+          background: linear-gradient(135deg, #6366f1, #4f46e5);
+          transition: all 0.2s;
+          box-shadow: 0 4px 20px rgba(79, 70, 229, 0.2);
+        }
+        .btn-audit:hover { box-shadow: 0 0 30px rgba(99,102,241,0.5); transform: translateY(-1px); }
+        .btn-audit:active { transform: translateY(0) scale(0.98); }
+
+        .code-textarea { background: transparent; color: #a5b4fc; caret-color: #6366f1; line-height: 1.8; tab-size: 4; }
+        .code-textarea::selection { background: rgba(99,102,241,0.3); }
+
+        .tab-active { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.4) !important; color: #a5b4fc !important; }
+
+        .challenge-card { cursor: pointer; border: 1px solid rgba(99,102,241,0.1); background: rgba(10,12,28,0.6); transition: all 0.2s; }
+        .challenge-card:hover { border-color: rgba(99,102,241,0.35); transform: translateY(-2px); }
+        .challenge-card.active { border-color: rgba(99,102,241,0.6); background: rgba(99,102,241,0.08); }
+
+        .metric-box { background: rgba(10,12,28,0.8); border: 1px solid rgba(99,102,241,0.1); padding: 12px 16px; border-radius: 12px; }
+
+        .pulse-dot { animation: pulse 2s infinite; }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+
+        .line-number {
+          color: rgba(99,102,241,0.25);
+          user-select: none;
+          text-align: right;
+          padding-right: 16px;
+          min-width: 44px;
+          font-size: 11px;
+          line-height: 1.8;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar { width: 3px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.15); border-radius: 4px; }
+      `}</style>
+
+      {/* Header */}
+      <header className="relative z-30 bg-[#04050d]/90 backdrop-blur-2xl border-b border-indigo-500/10">
+        <div className="max-w-screen-2xl mx-auto px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <button 
+              onClick={onBack} 
+              aria-label="Return to Repository"
+              className="flex items-center gap-2 text-slate-500 hover:text-white transition-all group"
+            >
+              <span className="group-hover:-translate-x-0.5 transition-transform text-sm">←</span>
+              <span className="mono text-[10px] uppercase tracking-widest">Repository</span>
+            </button>
+            <div className="h-4 w-px bg-indigo-500/15" />
+            <span className="mono text-[10px] text-slate-600 tracking-[0.2em]">
+              PyQuest / <span className="text-indigo-400">Neural_Sandbox</span>
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="pulse-dot w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="mono text-[10px] text-emerald-500/70 tracking-widest">LIVE_KERNEL</span>
+            </div>
+            <div className="bg-indigo-500/10 border border-indigo-500/20 rounded px-3 py-1 text-[10px] text-slate-500 mono">{lineCount} ln</div>
+            <button 
+              onClick={onOpenAura} 
+              aria-label="Consult Aura AI"
+              className="bg-indigo-600/15 border border-indigo-500/30 text-indigo-300 px-5 py-2 rounded-xl mono text-[10px] tracking-widest hover:bg-indigo-600/25 transition-all"
+            >
+              ✦ CONSULT AURA
+            </button>
+          </div>
         </div>
       </header>
 
-      <main className="flex-1 max-w-[1800px] w-full mx-auto p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 overflow-hidden">
-        {/* Code Editor Section */}
-        <div className="lg:col-span-7 flex flex-col h-full space-y-6 overflow-hidden">
-          <div className="flex-1 bg-[#0b0e14]/50 border border-white/5 rounded-[40px] overflow-hidden flex flex-col shadow-2xl relative">
-            <div className="bg-[#05070d] px-10 py-5 border-b border-white/5 flex items-center justify-between">
+      {/* Main Layout */}
+      <main className="relative z-20 max-w-screen-2xl mx-auto p-6 grid gap-5" style={{ gridTemplateColumns: '1fr 460px', minHeight: 'calc(100vh - 64px)' }}>
+
+        {/* LEFT: Code Editor */}
+        <div className="flex flex-col gap-4 min-h-0">
+          <div className="panel panel-glow rounded-2xl flex flex-col overflow-hidden flex-1 min-h-0">
+            {/* Toolbar */}
+            <div className="flex items-center justify-between px-5 py-3 shrink-0 border-b border-indigo-500/10 bg-[#060814]/80">
               <div className="flex items-center gap-3">
                 <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500/20"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500/20"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/20"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500/60" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500/60" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/60" />
                 </div>
-                <span className="text-[9px] font-bold text-slate-600 uppercase tracking-[0.2em] ml-4">Sandbox_Kernel.py</span>
+                <div className="h-3 w-px bg-indigo-500/15 mx-2" />
+                <span className="mono text-[10px] text-indigo-400/60 tracking-widest">sandbox_kernel.py</span>
               </div>
+              <div className="mono text-[9px] text-slate-700 tracking-widest">Python 3.12 · UTF-8</div>
             </div>
-            <textarea 
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              spellCheck={false}
-              className="flex-1 w-full p-12 bg-transparent text-indigo-100 font-mono text-lg focus:outline-none resize-none leading-relaxed code-font selection:bg-indigo-500/30"
-            />
-            <div className="p-8 bg-[#0b0e14] border-t border-white/5 flex justify-end gap-6">
-               <button 
-                 onClick={handleRequestAudit}
-                 className="px-10 py-4 bg-white text-black rounded-2xl font-bold text-[11px] uppercase tracking-widest shadow-xl hover:bg-indigo-50 transition-all active:scale-95 italic"
-               >
-                 Request Audit
-               </button>
+
+            {/* Editor Container */}
+            <div className="flex-1 flex overflow-hidden">
+              <div 
+                ref={lineNumbersRef}
+                className="flex flex-col pt-5 pb-5 shrink-0 overflow-hidden bg-black/30 border-r border-indigo-500/5 select-none"
+              >
+                {code.split('\n').map((_, i) => (
+                  <div key={i} className="line-number">{i + 1}</div>
+                ))}
+              </div>
+              <textarea
+                ref={textareaRef}
+                value={code}
+                onChange={e => setCode(e.target.value)}
+                onScroll={handleScroll}
+                spellCheck={false}
+                aria-label="Python Code Editor"
+                className={`code-textarea flex-1 p-5 resize-none outline-none text-sm font-mono ${glitchActive ? 'glitch-text' : ''}`}
+              />
+            </div>
+
+            {/* Footer */}
+            <div className="px-5 py-4 shrink-0 flex items-center justify-between border-t border-indigo-500/10 bg-[#060814]/60">
+              <div className="mono text-[10px] text-slate-700">
+                {activeChallengeId ? 'CHALLENGE_ACTIVE' : activeProjectId ? 'PROJECT_SCAFFOLD' : 'FREE_EXPLORATION'}
+              </div>
+              <button
+                onClick={handleRequestAudit}
+                className="btn-audit flex items-center gap-3 px-10 py-3.5 rounded-xl text-white mono font-bold text-xs tracking-[0.2em]"
+              >
+                ⬡ AUDIT KERNEL
+              </button>
             </div>
           </div>
 
-          <div className="bg-[#0b0e14]/30 border border-white/5 rounded-[32px] p-6 shadow-xl">
-            <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-4 ml-2">Synthetic Data Synthesizer</h4>
-            <div className="flex gap-4">
-              <input 
+          {/* Dataset Synthesizer */}
+          <div className="panel panel-glow rounded-2xl p-5 shrink-0">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="mono text-[10px] text-cyan-400 tracking-widest">⬡ SYNTHETIC_GENERATOR</span>
+            </div>
+            <div className="flex gap-3">
+              <input
                 value={datasetPrompt}
-                onChange={(e) => setDatasetPrompt(e.target.value)}
-                placeholder="Describe the test distribution (e.g. 100 samples of noisy sin wave...)"
-                className="flex-1 bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white outline-none focus:border-indigo-500/50 transition-all placeholder:text-slate-700"
+                onChange={e => setDatasetPrompt(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSynthesizeDataset()}
+                placeholder="Describe: Normal distribution, 500 samples, mean=0, std=1..."
+                className="flex-1 rounded-xl px-5 py-3.5 outline-none bg-black/80 border border-indigo-500/20 text-[#c7d2fe] mono text-xs focus:border-cyan-500/40 transition-all"
               />
-              <button 
+              <button
                 onClick={handleSynthesizeDataset}
-                className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-indigo-500 transition-all active:scale-95"
+                className="px-8 rounded-xl mono font-bold text-[10px] tracking-widest transition-all bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 active:scale-95"
               >
-                Synthesize
+                SYNTHESIZE →
               </button>
             </div>
           </div>
         </div>
 
-        {/* Audit / Results Sidebar */}
-        <div className="lg:col-span-5 flex flex-col h-full space-y-6 overflow-hidden">
-          {/* Tab Switcher */}
-          <div className="flex bg-[#0b0e14] p-1.5 rounded-2xl border border-white/5 shrink-0">
-             <button 
-               onClick={() => setActiveTab('Audit')}
-               className={`flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'Audit' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}
-             >
-               Audit Log
-             </button>
-             <button 
-               onClick={() => setActiveTab('Data')}
-               className={`flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'Data' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}
-             >
-               Dataset Repo
-             </button>
+        {/* RIGHT: Sidebar */}
+        <div className="flex flex-col gap-4 min-h-0">
+          {/* Tabs */}
+          <div className="panel panel-glow rounded-2xl p-1.5 grid grid-cols-4 gap-1">
+            {(['Audit', 'Data', 'Challenges', 'Projects'] as const).map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`py-2.5 rounded-xl mono text-[9px] tracking-widest transition-all ${activeTab === tab ? 'tab-active' : 'text-slate-600 hover:text-slate-400'}`}
+              >
+                {tab.toUpperCase()}
+              </button>
+            ))}
           </div>
 
-          <div className="flex-1 overflow-y-auto pr-2 custom-scroll space-y-6">
-            {activeTab === 'Audit' ? (
-              <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
+          <div className="flex-1 min-h-0 overflow-y-auto sidebar-scroll space-y-4">
+            {activeTab === 'Audit' && (
+              <div className="fade-in space-y-4">
                 {audit ? (
                   <>
-                    <div className="p-8 rounded-[40px] bg-[#0b0e14] border border-white/5 shadow-xl space-y-8">
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-2">
-                           <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Efficiency Status</span>
-                           <div className="text-6xl font-extrabold text-white tracking-tighter italic">{audit.efficiencyScore}%</div>
+                    <div className="panel panel-glow rounded-2xl p-8 space-y-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="mono text-[9px] text-indigo-400/60 tracking-widest mb-2">EFFICIENCY_SCORE</p>
+                          <div className="syne font-black text-6xl text-white leading-none">
+                            {audit.efficiencyScore}<span className="text-3xl text-indigo-500">%</span>
+                          </div>
                         </div>
-                        <div className="px-5 py-2 rounded-xl bg-white/5 border border-white/10">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">{audit.bigO}</span>
+                        <svg width="80" height="80" viewBox="0 0 90 90">
+                          <circle cx="45" cy="45" r="36" fill="none" stroke="rgba(99,102,241,0.1)" strokeWidth="6" />
+                          <circle
+                            cx="45" cy="45" r="36"
+                            fill="none"
+                            stroke={audit.efficiencyScore >= 80 ? '#10b981' : audit.efficiencyScore >= 50 ? '#f59e0b' : '#f43f5e'}
+                            strokeWidth="6"
+                            strokeLinecap="round"
+                            strokeDasharray="226"
+                            strokeDashoffset={226 - (226 * audit.efficiencyScore) / 100}
+                            transform="rotate(-90 45 45)"
+                            className="transition-all duration-1000"
+                          />
+                        </svg>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="metric-box">
+                          <p className="mono text-[8px] text-slate-500 uppercase tracking-widest">Big-O</p>
+                          <p className="mono font-bold mt-1 text-indigo-300">{audit.bigO}</p>
                         </div>
-                      </div>
-
-                      <div className="space-y-4">
-                        <h5 className="text-[10px] font-bold text-white uppercase tracking-widest opacity-40">Architectural Review</h5>
-                        <p className="text-lg text-slate-300 leading-relaxed font-medium">"{audit.architecturalReview}"</p>
-                      </div>
-
-                      <div className="space-y-4">
-                         <h5 className="text-[10px] font-bold text-white uppercase tracking-widest opacity-40">Optimizations Suggested</h5>
-                         <ul className="space-y-3">
-                           {audit.suggestedImprovements.map((imp, idx) => (
-                             <li key={idx} className="text-sm text-slate-400 flex gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
-                               <span className="text-indigo-400 font-black">#</span>
-                               {imp}
-                             </li>
-                           ))}
-                         </ul>
-                      </div>
-
-                      <div className={`p-6 rounded-2xl border ${audit.isProductionReady ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'} text-[10px] font-bold uppercase tracking-widest text-center italic`}>
-                        {audit.isProductionReady ? 'Production Optimized' : 'Architectural Audit Required'}
+                        <div className="metric-box">
+                          <p className="mono text-[8px] text-slate-500 uppercase tracking-widest">Integrity</p>
+                          <p className={`mono font-bold mt-1 ${audit.isProductionReady ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {audit.isProductionReady ? 'SOUND' : 'ERRATIC'}
+                          </p>
+                        </div>
                       </div>
                     </div>
 
+                    <div className="panel panel-glow rounded-2xl p-6 space-y-3">
+                      <p className="mono text-[9px] text-indigo-400/50 tracking-widest uppercase">Structural Review</p>
+                      <p className="syne text-slate-400 text-sm leading-relaxed">{audit.architecturalReview}</p>
+                    </div>
+
+                    <div className="panel panel-glow rounded-2xl p-6 space-y-4">
+                      <p className="mono text-[9px] text-indigo-400/50 tracking-widest uppercase">Optimizations</p>
+                      {audit.suggestedImprovements.map((imp, idx) => (
+                        <div key={idx} className="flex gap-4 p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
+                          <span className="mono font-bold text-indigo-500 text-xs">#{idx + 1}</span>
+                          <p className="syne text-xs text-slate-400 leading-normal">{imp}</p>
+                        </div>
+                      ))}
+                    </div>
+
                     {audit.visualizationData && (
-                      <div className="h-[350px] w-full bg-[#0b0e14] rounded-[40px] p-8 border border-white/5">
+                      <div className="panel panel-glow rounded-2xl h-[280px] overflow-hidden">
                         <Visualizer data={audit.visualizationData} />
                       </div>
                     )}
                   </>
                 ) : (
-                  <div className="h-[400px] flex flex-col items-center justify-center p-20 text-center space-y-6 bg-[#0b0e14]/20 border border-dashed border-white/5 rounded-[40px]">
-                    <div className="text-7xl grayscale opacity-20">🔎</div>
-                    <div className="space-y-2">
-                       <p className="text-sm text-slate-500 font-bold uppercase tracking-widest">Awaiting Neural Kernel</p>
-                       <p className="text-xs text-slate-700 max-w-xs mx-auto">Author your logical primitives and request a neural audit to see performance benchmarks.</p>
-                    </div>
+                  <div className="panel rounded-2xl p-16 text-center space-y-6">
+                    <div className="text-5xl opacity-10">⬡</div>
+                    <p className="mono text-[10px] text-slate-600 tracking-widest uppercase">Aura is Idle. Audit kernel for analysis.</p>
                   </div>
                 )}
               </div>
-            ) : (
-              <div className="space-y-6 animate-in slide-in-from-right-4 duration-500 h-full">
-                 {dataset ? (
-                   <div className="p-8 rounded-[40px] bg-[#0b0e14] border border-white/5 shadow-xl space-y-8 flex flex-col h-full min-h-[500px]">
-                     <div className="space-y-2">
-                       <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Synthetic Manifest</span>
-                       <h3 className="text-3xl font-bold text-white tracking-tight italic">{dataset.name}</h3>
-                     </div>
-                     
-                     <div className="flex-1 bg-black/40 rounded-[32px] p-6 font-mono text-[11px] text-emerald-500/60 overflow-y-auto whitespace-pre custom-scroll border border-white/5">
-                       {dataset.data}
-                     </div>
+            )}
 
-                     <button 
-                       onClick={() => {
-                          const blob = new Blob([dataset.data], { type: 'text/plain' });
-                          const url = URL.createObjectURL(blob);
-                          const a = document.createElement('a');
-                          a.href = url;
-                          a.download = `synthetic_data.${dataset.format}`;
-                          a.click();
-                       }}
-                       className="w-full py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest border border-white/10 transition-all italic"
-                     >
-                       Download Artifact (.{dataset.format})
-                     </button>
-                   </div>
-                 ) : (
-                   <div className="h-[400px] flex flex-col items-center justify-center p-20 text-center space-y-6 bg-[#0b0e14]/20 border border-dashed border-white/5 rounded-[40px]">
-                     <div className="text-7xl grayscale opacity-20">🗃️</div>
-                     <div className="space-y-2">
-                       <p className="text-sm text-slate-500 font-bold uppercase tracking-widest">Synthesizer Idle</p>
-                       <p className="text-xs text-slate-700 max-w-xs mx-auto">Use the Synthesizer below to generate high-fidelity datasets for your sandbox kernels.</p>
-                     </div>
-                   </div>
-                 )}
+            {activeTab === 'Data' && (
+              <div className="fade-in space-y-4">
+                {dataset ? (
+                  <div className="panel panel-glow rounded-2xl p-6 space-y-5">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="mono text-[9px] text-cyan-400/60 uppercase">Artifact Synthesized</p>
+                        <h4 className="syne font-bold text-xl text-white mt-1">{dataset.name}</h4>
+                      </div>
+                      <button 
+                        onClick={() => copyToClipboard(dataset.data)}
+                        className="text-[10px] mono text-slate-500 hover:text-white"
+                      >
+                        [COPY]
+                      </button>
+                    </div>
+                    <div className="bg-black/90 border border-cyan-500/10 p-5 rounded-xl font-mono text-[10px] text-cyan-500/40 leading-loose overflow-x-auto max-h-[400px]">
+                      {dataset.data}
+                    </div>
+                    <button
+                      onClick={() => {
+                        const blob = new Blob([dataset.data], { type: 'text/plain' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `${dataset.name.toLowerCase().replace(/\s/g, '_')}.${dataset.format}`;
+                        a.click();
+                      }}
+                      className="w-full py-3.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 mono text-[10px] tracking-widest hover:bg-cyan-500/15"
+                    >
+                      DOWNLOAD_MANIFEST (.{dataset.format.toUpperCase()})
+                    </button>
+                  </div>
+                ) : (
+                  <div className="panel rounded-2xl p-16 text-center space-y-6">
+                    <div className="text-5xl opacity-10">◈</div>
+                    <p className="mono text-[10px] text-slate-600 tracking-widest uppercase">Describe a dataset below to begin.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'Challenges' && (
+              <div className="fade-in space-y-3">
+                {CHALLENGES.map(ch => (
+                  <div
+                    key={ch.id}
+                    className={`challenge-card rounded-xl p-5 ${activeChallengeId === ch.id ? 'active' : ''}`}
+                    onClick={() => loadChallenge(ch)}
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <span className="mono font-bold text-sm text-white">{ch.label}</span>
+                      <span className="mono text-[8px] px-2 py-0.5 rounded-md" style={{ color: DIFFICULTY_COLORS[ch.difficulty], background: `${DIFFICULTY_COLORS[ch.difficulty]}15` }}>
+                        {ch.difficulty.toUpperCase()}
+                      </span>
+                    </div>
+                    <p className="mono text-[10px] text-slate-500 tracking-widest">
+                      {activeChallengeId === ch.id ? '● ACTIVE_DRILL' : '○ LOAD_PROTO'}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeTab === 'Projects' && (
+              <div className="fade-in space-y-3">
+                {MINI_PROJECTS.map(proj => (
+                  <div 
+                    key={proj.id} 
+                    className={`challenge-card rounded-xl p-5 ${activeProjectId === proj.id ? 'active' : ''}`}
+                    onClick={() => loadProject(proj)}
+                  >
+                    <div className="flex items-center gap-4 mb-2">
+                      <span className="text-2xl">{proj.icon}</span>
+                      <span className="syne font-bold text-white">{proj.label}</span>
+                    </div>
+                    <p className="mono text-[9px] text-slate-500 tracking-widest">SCAFFOLD_READY</p>
+                  </div>
+                ))}
               </div>
             )}
           </div>
         </div>
       </main>
-      <style>{`
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
-      `}</style>
     </div>
   );
 };
