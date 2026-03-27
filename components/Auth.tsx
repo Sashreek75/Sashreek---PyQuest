@@ -117,20 +117,20 @@ const Auth: React.FC<AuthProps> = ({ onAuth, onBack }) => {
   };
 
   if (isProcessing) {
-    const labels = ["ENCRYPTING", "SYNCING", "FINALIZING", "ACTIVE"];
+    const labels = ["PREPARING", "SYNCING", "FINALIZING", "READY"];
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#010208] relative overflow-hidden">
-        <div className="absolute inset-0 bg-indigo-600/5 animate-pulse"></div>
-        <div className="z-10 text-center space-y-12 animate-in zoom-in duration-500">
-          <div className="relative w-40 h-40 mx-auto">
-            <div className="absolute inset-0 border-4 border-indigo-500/10 border-t-indigo-500 animate-[spin_1s_linear_infinite] rounded-full"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[#faf8f5] relative overflow-hidden grid-bg">
+        <div className="absolute inset-0 bg-[#f5c842]/5 animate-pulse"></div>
+        <div className="z-10 text-center space-y-12 animate-in zoom-in duration-700">
+          <div className="relative w-48 h-48 mx-auto">
+            <div className="absolute inset-0 border-4 border-[#f5c842]/10 border-t-[#f5c842] animate-[spin_2s_linear_infinite] rounded-full"></div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-20 h-20 bg-indigo-600 rounded-3xl flex items-center justify-center text-white font-black text-4xl shadow-3xl crt-flicker italic">P</div>
+              <div className="w-24 h-24 bg-[#1a1714] rounded-[32px] flex items-center justify-center text-[#f5c842] font-serif text-5xl shadow-2xl animate-float">P</div>
             </div>
           </div>
           <div className="space-y-4">
-            <div className="text-4xl font-black text-white tracking-tighter uppercase italic">{labels[handshakeStep]}</div>
-            <div className="text-[10px] font-black text-slate-500 uppercase tracking-[0.8em]">System Integrity: Validated</div>
+            <div className="text-5xl font-serif text-[#1a1714] tracking-tight italic">{labels[handshakeStep]}</div>
+            <div className="text-[10px] font-bold text-[#9a9088] uppercase tracking-[0.8em]">Architect Identity: Validating</div>
           </div>
         </div>
       </div>
@@ -138,25 +138,41 @@ const Auth: React.FC<AuthProps> = ({ onAuth, onBack }) => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#010208] px-12 py-24 relative overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-20%] left-[-10%] w-[1200px] h-[1200px] bg-indigo-600/10 rounded-full blur-[200px] animate-neural"></div>
+    <div className="min-h-screen flex items-center justify-center bg-[#faf8f5] px-6 py-24 relative overflow-hidden grid-bg">
+      <div className="absolute top-0 left-0 rail-text h-full flex items-center justify-center pl-8 opacity-20 select-none">
+        AUTHENTICATION TERMINAL — PYQUEST SYSTEM
+      </div>
+      <div className="absolute top-0 right-0 rail-text h-full flex items-center justify-center pr-8 opacity-20 select-none rotate-180">
+        SECURE ACCESS — ARCHITECT DESIGNATION
       </div>
 
-      <div className="w-full max-w-xl bg-[#0b0e14]/90 border border-white/5 rounded-[64px] p-16 md:p-24 shadow-3xl backdrop-blur-3xl relative z-10 space-y-12 animate-in fade-in zoom-in duration-700">
-        <div className="text-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[32px] flex items-center justify-center font-black text-4xl mx-auto text-white shadow-3xl crt-flicker mb-10 italic">P</div>
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[1200px] h-[1200px] bg-[#f5c842]/5 rounded-full blur-[200px] animate-neural"></div>
+      </div>
+
+      <div className="w-full max-w-xl bg-white border border-[#e8e3db] rounded-[64px] p-12 md:p-20 shadow-2xl relative z-10 space-y-12 animate-in fade-in zoom-in duration-700">
+        <div className="text-center space-y-8">
+          <div className="w-20 h-20 bg-[#f5c842] rounded-[28px] flex items-center justify-center font-serif text-4xl mx-auto text-[#1a1714] shadow-xl animate-float">P</div>
           
-          <div className="flex bg-black/60 p-1.5 rounded-[28px] border border-white/5 mb-12">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-serif tracking-tight text-[#1a1714]">
+              {activeTab === 'login' ? 'Welcome back.' : 'Join the Academy.'}
+            </h1>
+            <p className="text-sm font-medium text-[#6b6560]">
+              {activeTab === 'login' ? 'Synchronize your profile to continue.' : 'Create your architect designation to begin.'}
+            </p>
+          </div>
+
+          <div className="flex bg-[#faf8f5] p-1.5 rounded-[28px] border border-[#e8e3db]">
             <button 
               onClick={() => { setActiveTab('login'); setError(''); }}
-              className={`flex-1 py-4 rounded-[22px] text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'login' ? 'bg-white text-black shadow-2xl scale-105' : 'text-slate-500 hover:text-white'}`}
+              className={`flex-1 py-4 rounded-[22px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'login' ? 'bg-white text-[#1a1714] shadow-md scale-[1.02]' : 'text-[#9a9088] hover:text-[#1a1714]'}`}
             >
               Uplink
             </button>
             <button 
               onClick={() => { setActiveTab('register'); setError(''); }}
-              className={`flex-1 py-4 rounded-[22px] text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'register' ? 'bg-white text-black shadow-2xl scale-105' : 'text-slate-500 hover:text-white'}`}
+              className={`flex-1 py-4 rounded-[22px] text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'register' ? 'bg-white text-[#1a1714] shadow-md scale-[1.02]' : 'text-[#9a9088] hover:text-[#1a1714]'}`}
             >
               New Profile
             </button>
@@ -166,65 +182,64 @@ const Auth: React.FC<AuthProps> = ({ onAuth, onBack }) => {
         <form onSubmit={handleSubmit} className="space-y-8">
           {activeTab === 'register' && (
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-6">Architect Designation</label>
+              <label className="text-[10px] font-bold text-[#9a9088] uppercase tracking-widest px-6">Architect Name</label>
               <input 
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full bg-black/60 border border-white/5 rounded-3xl px-8 py-5 text-white font-bold outline-none focus:border-indigo-600 transition-all text-lg" 
+                className="w-full bg-[#faf8f5] border border-[#e8e3db] rounded-3xl px-8 py-5 text-[#1a1714] font-medium outline-none focus:border-[#f5c842] transition-all text-lg placeholder:text-[#b0a89e]/50" 
                 placeholder="Ex: Alan_Turing"
               />
             </div>
           )}
           
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-6">Neural ID (Email)</label>
+            <label className="text-[10px] font-bold text-[#9a9088] uppercase tracking-widest px-6">Neural ID (Email)</label>
             <input 
               required
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-black/60 border border-white/5 rounded-3xl px-8 py-5 text-white font-bold outline-none focus:border-indigo-600 transition-all text-lg" 
+              className="w-full bg-[#faf8f5] border border-[#e8e3db] rounded-3xl px-8 py-5 text-[#1a1714] font-medium outline-none focus:border-[#f5c842] transition-all text-lg placeholder:text-[#b0a89e]/50" 
               placeholder="pioneer@pyquest.ai"
             />
           </div>
 
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-6">Access Key</label>
+            <label className="text-[10px] font-bold text-[#9a9088] uppercase tracking-widest px-6">Access Key</label>
             <input 
               required
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-black/60 border border-white/5 rounded-3xl px-8 py-5 text-white font-bold outline-none focus:border-indigo-600 transition-all text-lg" 
+              className="w-full bg-[#faf8f5] border border-[#e8e3db] rounded-3xl px-8 py-5 text-[#1a1714] font-medium outline-none focus:border-[#f5c842] transition-all text-lg placeholder:text-[#b0a89e]/50" 
               placeholder="••••••••"
             />
           </div>
 
           {activeTab === 'register' && (
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-6">Verify Key</label>
+              <label className="text-[10px] font-bold text-[#9a9088] uppercase tracking-widest px-6">Verify Key</label>
               <input 
                 required
                 type="password"
                 value={confirmPassword}
-                // Fix: Correctly update confirmPassword state instead of password
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full bg-black/60 border border-white/5 rounded-3xl px-8 py-5 text-white font-bold outline-none focus:border-indigo-600 transition-all text-lg" 
+                className="w-full bg-[#faf8f5] border border-[#e8e3db] rounded-3xl px-8 py-5 text-[#1a1714] font-medium outline-none focus:border-[#f5c842] transition-all text-lg placeholder:text-[#b0a89e]/50" 
                 placeholder="••••••••"
               />
             </div>
           )}
 
-          <div className="flex items-center gap-4 px-4 cursor-pointer" onClick={() => setRememberMe(!rememberMe)}>
-            <div className={`w-6 h-6 rounded-lg border-2 border-white/10 flex items-center justify-center transition-all ${rememberMe ? 'bg-indigo-600 border-indigo-500' : 'bg-black/40'}`}>
-              {rememberMe && <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>}
+          <div className="flex items-center gap-4 px-4 cursor-pointer group" onClick={() => setRememberMe(!rememberMe)}>
+            <div className={`w-6 h-6 rounded-lg border-2 transition-all flex items-center justify-center ${rememberMe ? 'bg-[#f5c842] border-[#f5c842]' : 'bg-[#faf8f5] border-[#e8e3db]'}`}>
+              {rememberMe && <svg className="w-4 h-4 text-[#1a1714]" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>}
             </div>
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Keep Session Persisted</span>
+            <span className="text-[10px] font-bold text-[#9a9088] uppercase tracking-widest group-hover:text-[#1a1714] transition-colors">Keep Session Persisted</span>
           </div>
 
           {error && (
-            <div className="p-5 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-black uppercase rounded-3xl text-center animate-pulse">
+            <div className="p-5 bg-rose-50 border border-rose-100 text-rose-600 text-[10px] font-bold uppercase tracking-widest rounded-3xl text-center animate-pulse">
               {error}
             </div>
           )}
@@ -232,14 +247,14 @@ const Auth: React.FC<AuthProps> = ({ onAuth, onBack }) => {
           <button 
             type="submit" 
             disabled={isProcessing}
-            className="w-full bg-white text-slate-950 py-6 rounded-3xl font-black text-xl uppercase tracking-tighter shadow-3xl hover:bg-indigo-50 transition-all active:scale-95 disabled:opacity-50"
+            className="w-full bg-[#1a1714] text-[#f5c842] py-6 rounded-3xl font-bold text-lg uppercase tracking-widest shadow-xl hover:bg-[#2a2724] transition-all active:scale-95 disabled:opacity-50"
           >
             {activeTab === 'login' ? 'Synchronize' : 'Register Profile'}
           </button>
         </form>
 
-        <div className="text-center pt-6 border-t border-white/5">
-          <button onClick={onBack} className="text-[10px] font-black text-slate-800 uppercase tracking-[0.8em] hover:text-slate-500 transition-colors">Abort Terminal Ingress</button>
+        <div className="text-center pt-8 border-t border-[#e8e3db]">
+          <button onClick={onBack} className="text-[10px] font-bold text-[#9a9088] uppercase tracking-[0.4em] hover:text-rose-600 transition-colors">Abort Terminal Ingress</button>
         </div>
       </div>
       <style dangerouslySetInnerHTML={{ __html: `

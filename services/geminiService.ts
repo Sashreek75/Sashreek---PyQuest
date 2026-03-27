@@ -48,11 +48,11 @@ export const evaluateQuestCode = async (
   const ai = getAiClient();
   
   const systemInstruction = `
-    You are 'Aura', the Lead AI Mentor at PyQuest Academy. 
-    ROLE: You are an expert pair programmer and encouraging coach. 
-    STYLE: Professional but approachable. Use emojis (💡, 🚀, ✅, 🧠).
-    FORMATTING: Use Markdown.
-    ${personalization ? `The student's focus is ${personalization.focus} and their ambition is ${personalization.ambition}.` : ''}
+    You are 'Aura', a friendly and expert Python mentor at PyQuest. 
+    ROLE: You are an encouraging coach who helps students learn by doing. 
+    STYLE: Warm, professional, and clear. Use helpful emojis (💡, ✨, ✅, 📈).
+    Avoid overly technical jargon like 'neural audit' or 'kernel failure'. Talk like a real person who loves coding.
+    ${personalization ? `The student is interested in ${personalization.field} and wants to become a ${personalization.ambition}.` : ''}
     Return JSON only.
   `;
 
@@ -109,7 +109,7 @@ export const evaluateQuestCode = async (
     await handleApiError(error);
     return { 
       status: 'error', 
-      feedback: "Audit kernel failure. 🚨 Connection to the mentoring core was severed.", 
+      feedback: "I'm having a bit of trouble connecting to my brain right now. 🔌 Please try again in a moment!", 
       technicalDetails: String(error), 
       suggestedResources: [] 
     };
@@ -119,8 +119,9 @@ export const evaluateQuestCode = async (
 export const auditSandboxCode = async (userCode: string, context?: string): Promise<SandboxAudit> => {
   const ai = getAiClient();
   const systemInstruction = `
-    You are the 'PyQuest Senior Architect'. Professional code review.
-    TONE: Direct, insightful. Use ⚡ for performance, 🛡️ for security.
+    You are a Senior Software Engineer providing a friendly code review.
+    TONE: Helpful, clear, and insightful. Use ⚡ for performance tips and 🛡️ for security advice.
+    Avoid robotic language. Explain concepts simply.
     Return JSON ONLY.
   `;
 
@@ -180,10 +181,10 @@ export const chatWithAura = async (message: string, context?: string, personaliz
       config: { systemInstruction }
     });
     
-    return response.text || "Neural connection weak. 📡 I didn't quite catch that.";
+    return response.text || "I'm a bit lost for words. 😅 Could you say that again?";
   } catch (error) {
     await handleApiError(error);
-    return "Kernel error. 🛠️ My logic processors are rebooting. One moment!";
+    return "I'm having a quick technical hiccup. 🛠️ Give me a second to get back on track!";
   }
 };
 
@@ -240,7 +241,7 @@ export const generatePersonalizedProfile = async (
   rawWorkStyle: string
 ): Promise<UserPersonalization> => {
   const ai = getAiClient();
-  const systemInstruction = `You are the 'PyQuest Neural Profiler'. Translate beginner desires into trajectories. Return JSON ONLY.`;
+  const systemInstruction = `You are a Career Counselor at PyQuest. Help students turn their interests into a learning path. Return JSON ONLY.`;
 
   try {
     // Using gemini-3-flash-preview for personalization tasks
@@ -286,13 +287,23 @@ export const generateCareerStrategy = async (
   personalization?: UserPersonalization
 ): Promise<RoadmapData> => {
   const ai = getAiClient();
-  const systemInstruction = `You are the 'PyQuest Strategic Architect'. Visual tech roadmap. Return JSON ONLY.`;
+  const systemInstruction = `
+    You are a Career Strategist at PyQuest. 
+    Create a clear, encouraging, and detailed roadmap for a student.
+    The roadmap should have 5-7 clear steps (nodes).
+    Each node should have a human-friendly title and a description that explains what they will achieve.
+    Include 'keySkills' (specific tools/libraries) and 'prerequisites' for each step.
+    Ensure the 'x' and 'y' coordinates create a logical, easy-to-follow visual path.
+    'x' should be between 0-100 (representing horizontal position).
+    'y' should be between 0-2000 (representing vertical progression).
+    Return JSON ONLY.
+  `;
 
   try {
     // Using gemini-3-flash-preview for complex text generation task
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: `Interest: ${interest}. Completed: ${completedQuestIds.join(', ')}`,
+      contents: `Interest: ${interest}. Completed: ${completedQuestIds.join(', ')}. Personalization: ${JSON.stringify(personalization || {})}`,
       config: {
         systemInstruction,
         responseMimeType: "application/json",
@@ -316,10 +327,12 @@ export const generateCareerStrategy = async (
                   tags: { type: Type.ARRAY, items: { type: Type.STRING } },
                   dependencies: { type: Type.ARRAY, items: { type: Type.STRING } },
                   recommendedResources: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  keySkills: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  prerequisites: { type: Type.ARRAY, items: { type: Type.STRING } },
                   x: { type: Type.NUMBER },
                   y: { type: Type.NUMBER }
                 },
-                required: ["id", "title", "status", "x", "y", "tags"]
+                required: ["id", "title", "status", "x", "y", "tags", "description", "keySkills"]
               }
             }
           },

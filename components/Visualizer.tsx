@@ -22,61 +22,65 @@ const Visualizer: React.FC<VisualizerProps> = ({ data }) => {
   }
 
   return (
-    <div className="h-full w-full bg-slate-900 rounded-xl p-4 border border-slate-700">
-      <h4 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-4">Training Progress</h4>
+    <div className="h-full w-full bg-white rounded-2xl p-6 border border-[#e8e3db]">
+      <h4 className="font-mono text-[10px] text-[#9a9088] font-bold uppercase tracking-widest mb-6">Training Progress</h4>
       <div className="h-[250px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
             <defs>
               <linearGradient id="colorLoss" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.1}/>
+                <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
               </linearGradient>
               <linearGradient id="colorAcc" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#f5c842" stopOpacity={0.1}/>
+                <stop offset="95%" stopColor="#f5c842" stopOpacity={0}/>
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e8e3db" vertical={false} />
             <XAxis 
               dataKey="epoch" 
-              stroke="#64748b" 
-              fontSize={12} 
+              stroke="#9a9088" 
+              fontSize={10} 
               tickLine={false} 
               axisLine={false} 
+              fontFamily="JetBrains Mono"
             />
             <YAxis 
-              stroke="#64748b" 
-              fontSize={12} 
+              stroke="#9a9088" 
+              fontSize={10} 
               tickLine={false} 
               axisLine={false} 
+              fontFamily="JetBrains Mono"
             />
             <Tooltip 
-              contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569', borderRadius: '8px' }}
-              itemStyle={{ fontSize: '12px' }}
+              contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e8e3db', borderRadius: '12px', boxShadow: '0 10px 20px rgba(0,0,0,0.05)', fontSize: '11px', fontFamily: 'JetBrains Mono' }}
             />
-            <Legend verticalAlign="top" align="right" height={36}/>
+            <Legend verticalAlign="top" align="right" height={36} iconType="circle" wrapperStyle={{ fontSize: '10px', fontFamily: 'JetBrains Mono', textTransform: 'uppercase', letterSpacing: '0.1em' }} />
             <Area 
               type="monotone" 
               dataKey="loss" 
-              stroke="#ef4444" 
+              stroke="#f43f5e" 
+              strokeWidth={2}
               fillOpacity={1} 
               fill="url(#colorLoss)" 
-              name="Training Loss"
+              name="Loss"
             />
             <Area 
               type="monotone" 
               dataKey="val_loss" 
-              stroke="#f59e0b" 
+              stroke="#d97706" 
+              strokeWidth={2}
               fillOpacity={0} 
               strokeDasharray="5 5"
-              name="Validation Loss"
+              name="Val Loss"
             />
             {data[0]?.accuracy !== undefined && (
               <Area 
                 type="monotone" 
                 dataKey="accuracy" 
-                stroke="#10b981" 
+                stroke="#f5c842" 
+                strokeWidth={2}
                 fillOpacity={1} 
                 fill="url(#colorAcc)" 
                 name="Accuracy"

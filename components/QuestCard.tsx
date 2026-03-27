@@ -10,10 +10,10 @@ interface QuestCardProps {
 
 const getDifficultyColor = (difficulty: Difficulty) => {
   switch (difficulty) {
-    case 'Beginner': return 'text-emerald-400 bg-emerald-400/10';
-    case 'Intermediate': return 'text-amber-400 bg-amber-400/10';
-    case 'Advanced': return 'text-rose-400 bg-rose-400/10';
-    default: return 'text-slate-400 bg-slate-400/10';
+    case 'Beginner': return 'text-[#16a34a] bg-[#16a34a]/5 border-[#16a34a]/10';
+    case 'Intermediate': return 'text-[#d97706] bg-[#d97706]/5 border-[#d97706]/10';
+    case 'Advanced': return 'text-[#b91c1c] bg-[#b91c1c]/5 border-[#b91c1c]/10';
+    default: return 'text-[#6b6560] bg-[#6b6560]/5 border-[#6b6560]/10';
   }
 };
 
@@ -21,35 +21,35 @@ const QuestCard: React.FC<QuestCardProps> = ({ quest, isCompleted, onSelect }) =
   return (
     <div 
       onClick={() => onSelect(quest)}
-      className={`relative group cursor-pointer p-6 rounded-2xl border transition-all duration-300 ${
+      className={`relative group cursor-pointer p-8 rounded-[40px] border transition-all duration-500 ${
         isCompleted 
-          ? 'bg-slate-800/40 border-emerald-500/30' 
-          : 'bg-slate-800/80 border-slate-700 hover:border-indigo-500/50 hover:bg-slate-800'
+          ? 'bg-white border-[#16a34a]/20 shadow-sm opacity-80 hover:opacity-100' 
+          : 'bg-white border-[#e8e3db] hover:border-[#f5c842] hover:shadow-xl hover:-translate-y-1'
       }`}
     >
-      <div className="flex justify-between items-start mb-4">
-        <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${getDifficultyColor(quest.difficulty)}`}>
+      <div className="flex justify-between items-start mb-8">
+        <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border ${getDifficultyColor(quest.difficulty)}`}>
           {quest.difficulty}
         </span>
         {isCompleted && (
-          <div className="bg-emerald-500/20 text-emerald-400 p-1 rounded-full">
+          <div className="bg-[#16a34a]/10 text-[#16a34a] p-2 rounded-full border border-[#16a34a]/20">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
             </svg>
           </div>
         )}
       </div>
 
-      <h3 className="text-xl font-bold text-white mb-2 group-hover:text-indigo-400 transition-colors">
+      <h3 className="text-3xl font-serif font-black tracking-tighter text-[#1a1714] mb-4 group-hover:text-[#d97706] transition-colors italic leading-none">
         {quest.title}
       </h3>
-      <p className="text-slate-400 text-sm line-clamp-2 mb-4">
+      <p className="text-[#6b6560] text-base font-medium line-clamp-2 mb-8 leading-relaxed">
         {quest.description}
       </p>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 pt-4 border-t border-[#faf8f5]">
         {quest.topics.slice(0, 3).map(topic => (
-          <span key={topic} className="text-[10px] uppercase tracking-wider font-bold text-slate-500 bg-slate-900 px-2 py-1 rounded">
+          <span key={topic} className="text-[9px] uppercase tracking-widest font-black text-[#9a9088] bg-[#faf8f5] border border-[#e8e3db] px-3 py-1.5 rounded-xl">
             {topic}
           </span>
         ))}

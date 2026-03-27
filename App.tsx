@@ -48,8 +48,8 @@ const App: React.FC = () => {
         const hasKey = await aistudio.hasSelectedApiKey();
         if (!hasKey) {
           setNotification({
-            title: "AI Core Offline",
-            message: "Please select your Gemini API key to activate Aura.",
+            title: "AI Mentor Offline",
+            message: "Please select your Gemini API key to activate your AI mentor, Aura.",
             icon: "🔑"
           });
           if (typeof aistudio.openSelectKey === 'function') {
@@ -104,9 +104,9 @@ const App: React.FC = () => {
     setUser(authenticatedUser);
     loadUserProgress(authenticatedUser.id);
     setNotification({
-      title: "Access Granted",
-      message: `Identity confirmed. Welcome back, ${authenticatedUser.username}.`,
-      icon: "🔑"
+      title: "Welcome Back!",
+      message: `Great to see you again, ${authenticatedUser.username}. Ready to code?`,
+      icon: "👋"
     });
   };
 
@@ -114,14 +114,14 @@ const App: React.FC = () => {
     if (!user || !progress) return;
     
     const finalPersonalization = personalization || {
-      field: "General Intelligence",
-      ambition: "Expert Architect",
-      proficiency: "Neural Initiate",
+      field: "General Python",
+      ambition: "Software Developer",
+      proficiency: "Beginner",
       focus: "Python Core",
-      aiDirective: "Master the fundamental laws of applied intelligence.",
-      summary: "Explore the repository and find your path within the architecture.",
-      philosophies: ["Discovery"],
-      targetHardware: "Universal"
+      aiDirective: "Master the fundamentals of Python and AI.",
+      summary: "Start your journey by exploring the basics and building a strong foundation.",
+      philosophies: ["Learning by doing"],
+      targetHardware: "Standard PC"
     };
 
     const updatedProgress = { ...progress, personalization: finalPersonalization };
@@ -129,9 +129,9 @@ const App: React.FC = () => {
     db.saveProgress(user.id, updatedProgress);
     setView('Dashboard');
     setNotification({
-      title: "Sync Complete",
-      message: personalization ? "Your personalized curriculum is ready." : "Proceeding with standard training protocol.",
-      icon: personalization ? "🧠" : "🔓"
+      title: "Path Set!",
+      message: personalization ? "Your personalized learning path is ready." : "Let's start with the standard curriculum.",
+      icon: personalization ? "🗺️" : "🚀"
     });
   };
 
@@ -152,7 +152,7 @@ const App: React.FC = () => {
     streak: progress.currentStreak,
     longestStreak: progress.longestStreak || progress.currentStreak,
     badges: progress.achievements.map(a => a.title),
-    rank: progress.experience > 9000 ? 'Zenith Architect' : (progress.experience > 4500 ? 'Senior Neural Engineer' : (progress.experience > 1500 ? 'Applied Specialist' : 'Neural Initiate')),
+    rank: progress.experience > 9000 ? 'Master Developer' : (progress.experience > 4500 ? 'Senior Engineer' : (progress.experience > 1500 ? 'Skilled Coder' : 'New Learner')),
     totalHours: Math.floor(progress.experience / 120) + 1,
     skillMatrix: [], 
     globalPercentile: Math.min(99.9, 15 + (progress.experience / 100))
@@ -169,7 +169,7 @@ const App: React.FC = () => {
 
   const handleRunCode = async () => {
     if (!currentQuest) return;
-    setLoadingTask({ message: "AI Reviewing Your Logic", sub: "Aura is checking your code structure and math..." });
+    setLoadingTask({ message: "Aura is reviewing your code", sub: "Checking your logic and providing feedback..." });
     setEvaluation(null);
     
     try {
@@ -179,7 +179,7 @@ const App: React.FC = () => {
         setShowQuiz(true);
       }
     } catch (err) {
-      setNotification({ title: "Audit Failed", message: "Aura connection was interrupted. Please try again.", icon: "🚨" });
+      setNotification({ title: "Review Failed", message: "I couldn't reach Aura. Please try again.", icon: "⚠️" });
     } finally {
       setLoadingTask(null);
     }
@@ -250,32 +250,32 @@ const App: React.FC = () => {
   if (view === 'Profile' && user && progress) return <Profile user={user} progress={progress} stats={stats} onBack={() => setView('Dashboard')} />;
 
   const renderSimpleNav = () => (
-    <nav className="sticky top-0 z-50 bg-[#010208]/95 backdrop-blur-3xl border-b border-white/5 py-6">
-      <div className="max-w-[1800px] mx-auto px-12 flex items-center justify-between">
-        <div className="flex items-center gap-6 cursor-pointer group" onClick={() => setView('Dashboard')}>
-          <div className="w-12 h-12 bg-white text-black rounded-2xl flex items-center justify-center font-black text-2xl shadow-2xl transition-transform group-hover:scale-110 italic">P</div>
-          <h1 className="text-2xl font-black text-white uppercase tracking-tighter">PyQuest</h1>
+    <nav className="sticky top-0 z-50 bg-[#faf8f5]/90 backdrop-blur-md border-b border-[#e8e3db] py-4">
+      <div className="max-w-6xl mx-auto px-6 flex items-center justify-between">
+        <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setView('Dashboard')}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center text-xl transition-transform group-hover:scale-110" style={{ background: '#f5c842' }}>🐍</div>
+          <h1 className="text-xl font-serif tracking-tight text-[#1a1714]">PyQuest</h1>
         </div>
-        <div className="flex items-center gap-12">
-          <div className="hidden lg:flex gap-12 text-[11px] font-black uppercase tracking-[0.5em] text-slate-500">
+        <div className="flex items-center gap-8">
+          <div className="hidden md:flex gap-8 text-sm font-medium text-[#6b6560]">
             {['Dashboard', 'Academy', 'Skills', 'Sandbox', 'Pathfinder'].map((v) => (
               <button 
                 key={v}
                 onClick={() => setView((v === 'Pathfinder' ? 'CareerPath' : (v === 'Skills' ? 'Brain' : v)) as View)} 
-                className={`hover:text-white pb-1 border-b-2 transition-all ${(view as any) === (v === 'Pathfinder' ? 'CareerPath' : (v === 'Skills' ? 'Brain' : v)) ? 'text-indigo-400 border-indigo-400' : 'border-transparent'}`}
+                className={`hover:text-[#1a1714] transition-all ${(view as any) === (v === 'Pathfinder' ? 'CareerPath' : (v === 'Skills' ? 'Brain' : v)) ? 'text-[#1a1714] border-b-2 border-[#f5c842]' : 'border-transparent'}`}
               >
                 {v}
               </button>
             ))}
           </div>
-          <button onClick={handleLogout} className="text-rose-500 hover:text-rose-400 font-black text-[11px] uppercase tracking-widest bg-rose-500/5 px-8 py-3.5 rounded-2xl border border-rose-500/10 transition-all">LOGOUT</button>
+          <button onClick={handleLogout} className="text-sm font-semibold text-rose-600 hover:text-rose-700 transition-colors">Logout</button>
         </div>
       </div>
     </nav>
   );
 
   return (
-    <div className="min-h-screen bg-[#010208] text-slate-200">
+    <div className="min-h-screen bg-[#faf8f5] text-[#1a1714]">
       {(view !== 'Dashboard' && view !== 'Brain' && view !== 'Profile' && view !== 'Quest') && renderSimpleNav()}
       <main className="w-full">
         {view === 'Dashboard' && user && progress && (
@@ -290,17 +290,17 @@ const App: React.FC = () => {
           />
         )}
         {view === 'Academy' && (
-          <div className="max-w-[1800px] mx-auto px-12 py-32 space-y-24 animate-in fade-in duration-1000">
-            <div className="space-y-6">
-              <span className="text-[11px] font-black text-indigo-400 uppercase tracking-[0.8em]">Knowledge Base Directory</span>
-              <h1 className="text-8xl font-black text-white tracking-tighter uppercase italic">{selectedCategory || 'The Repository.'}</h1>
+          <div className="max-w-6xl mx-auto px-6 py-24 space-y-16 animate-in fade-in duration-1000">
+            <div className="space-y-4">
+              <span className="text-sm font-semibold text-[#9a9088] uppercase tracking-widest">Learning Library</span>
+              <h1 className="text-6xl font-serif tracking-tight text-[#1a1714]">{selectedCategory || 'The Learning Library.'}</h1>
               {selectedCategory && (
-                <button onClick={() => setSelectedCategory(null)} className="text-slate-600 hover:text-white text-[10px] font-bold uppercase tracking-widest flex items-center gap-3 transition-colors">
-                  <span className="text-lg">×</span> Clear Categorical Filter
+                <button onClick={() => setSelectedCategory(null)} className="text-[#6b6560] hover:text-[#1a1714] text-sm font-medium flex items-center gap-2 transition-colors">
+                  <span className="text-lg">×</span> Clear category filter
                 </button>
               )}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {QUESTS
                 .filter(q => !selectedCategory || q.category === selectedCategory)
                 .map(q => <QuestCard key={q.id} quest={q} isCompleted={progress?.completedQuests.includes(q.id) || false} onSelect={handleQuestSelect} />)
@@ -309,28 +309,28 @@ const App: React.FC = () => {
           </div>
         )}
         {view === 'Quest' && currentQuest && (
-          <div className="h-screen flex flex-col overflow-hidden bg-[#010208]">
-            <header className="h-20 border-b border-white/5 px-12 flex items-center justify-between shrink-0 bg-[#010208]/90 backdrop-blur-xl">
-              <div className="flex items-center gap-8">
-                <button onClick={() => setView('Academy')} className="text-slate-500 hover:text-white transition-all group flex items-center gap-3">
-                  <span className="group-hover:-translate-x-1 transition-transform font-black text-xl">←</span>
-                  <span className="text-[10px] font-bold uppercase tracking-widest italic hidden sm:inline">Academy</span>
+          <div className="h-screen flex flex-col overflow-hidden bg-[#faf8f5]">
+            <header className="h-20 border-b border-[#e8e3db] px-6 flex items-center justify-between shrink-0 bg-[#faf8f5]/90 backdrop-blur-md">
+              <div className="flex items-center gap-6">
+                <button onClick={() => setView('Academy')} className="text-[#6b6560] hover:text-[#1a1714] transition-all group flex items-center gap-2">
+                  <span className="group-hover:-translate-x-1 transition-transform font-bold text-lg">←</span>
+                  <span className="text-sm font-medium hidden sm:inline">Academy</span>
                 </button>
-                <div className="h-4 w-px bg-slate-800" />
-                <h2 className="text-xl font-black text-white uppercase tracking-tighter italic leading-none">{currentQuest.title}</h2>
+                <div className="h-4 w-px bg-[#e8e3db]" />
+                <h2 className="text-lg font-serif tracking-tight text-[#1a1714]">{currentQuest.title}</h2>
               </div>
-              <div className="flex items-center gap-10">
+              <div className="flex items-center gap-8">
                 <div className="flex flex-col items-end">
-                  <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Reward</span>
-                  <span className="text-indigo-400 text-xs font-black">+{currentQuest.xpReward} XP</span>
+                  <span className="text-[10px] font-semibold text-[#9a9088] uppercase tracking-widest">Reward</span>
+                  <span className="text-[#16a34a] text-sm font-bold">+{currentQuest.xpReward} XP</span>
                 </div>
-                <button onClick={handleLogout} className="text-rose-500 hover:text-rose-400 font-black text-[10px] uppercase tracking-widest">Abort</button>
+                <button onClick={handleLogout} className="text-rose-600 hover:text-rose-700 font-semibold text-sm">Abort</button>
               </div>
             </header>
 
             <div className="flex-1 flex overflow-hidden">
-              <div className="flex-1 overflow-y-auto border-r border-white/5 custom-scroll bg-[#05070d]/30">
-                <div className="max-w-4xl mx-auto px-12 py-20">
+              <div className="flex-1 overflow-y-auto border-r border-[#e8e3db] custom-scroll bg-white">
+                <div className="max-w-3xl mx-auto px-6 py-16">
                   <LessonContent 
                     introduction={currentQuest.lesson.introduction} 
                     sections={currentQuest.lesson.sections} 
@@ -343,35 +343,37 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex-1 flex flex-col bg-[#010208]">
+              <div className="flex-1 flex flex-col bg-[#faf8f5]">
                 <div className="flex-1 flex flex-col overflow-hidden relative">
-                   <div className="px-10 py-5 bg-[#0b0e14] border-b border-white/5 flex items-center justify-between shrink-0">
-                      <div className="flex items-center gap-3">
-                        <div className="w-3 h-3 rounded-full bg-rose-500/20"></div>
-                        <div className="w-3 h-3 rounded-full bg-emerald-500/20"></div>
-                        <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-4">challenge.py</span>
+                   <div className="px-6 py-4 bg-white border-b border-[#e8e3db] flex items-center justify-between shrink-0">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-[#fc6058]"></div>
+                        <div className="w-3 h-3 rounded-full bg-[#fec02f]"></div>
+                        <div className="w-3 h-3 rounded-full bg-[#2aca44]"></div>
+                        <span className="text-xs font-medium text-[#6b6560] ml-3">challenge.py</span>
                       </div>
                       <div className="flex gap-4">
-                        <button onClick={async () => setAiHint(await getAIHint(currentQuest.title, currentQuest.objective, code))} className="text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest italic">Hint</button>
-                        <button onClick={() => setIsAuraOpen(true)} className="text-[10px] font-black text-indigo-500 hover:text-white uppercase tracking-widest italic">Consult Aura</button>
+                        <button onClick={async () => setAiHint(await getAIHint(currentQuest.title, currentQuest.objective, code))} className="text-xs font-semibold text-[#6b6560] hover:text-[#1a1714] transition-colors">Hint</button>
+                        <button onClick={() => setIsAuraOpen(true)} className="text-xs font-semibold text-[#f5c842] hover:text-[#d97706] transition-colors">Consult Aura</button>
                       </div>
                    </div>
                    
                    <textarea 
                     ref={editorTextareaRef}
                     value={code} onChange={(e) => setCode(e.target.value)} spellCheck={false}
-                    className="flex-1 w-full p-12 bg-transparent text-indigo-100 font-mono text-xl focus:outline-none resize-none leading-relaxed code-font selection:bg-indigo-500/30"
+                    className="flex-1 w-full p-8 bg-transparent text-[#1a1714] font-mono text-lg focus:outline-none resize-none leading-relaxed code-font selection:bg-[#f5c842]/30"
                   />
 
-                  <div className="p-10 bg-[#0b0e14] border-t border-white/5 shadow-2xl">
-                    <div className="space-y-4">
-                      <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em]">Active Objective</span>
-                      <p className="text-xl font-bold text-white uppercase italic leading-tight">{currentQuest.objective}</p>
+                  <div className="p-8 bg-white border-t border-[#e8e3db] shadow-lg">
+                    <div className="space-y-2">
+                      <span className="text-xs font-semibold text-[#9a9088] uppercase tracking-widest">Active Objective</span>
+                      <p className="text-lg font-medium text-[#1a1714] leading-tight">{currentQuest.objective}</p>
                     </div>
-                    <div className="mt-8 flex justify-end">
+                    <div className="mt-6 flex justify-end">
                       <button 
                         onClick={handleRunCode} 
-                        className="px-12 py-5 bg-white text-black rounded-[24px] font-black uppercase text-xs tracking-widest active:scale-95 shadow-3xl transition-all hover:bg-indigo-50 italic"
+                        className="px-8 py-3 rounded-xl font-semibold text-sm transition-all active:scale-95 shadow-md hover:opacity-90"
+                        style={{ background: '#f5c842', color: '#1a1714' }}
                       >
                         Verify Logic →
                       </button>
@@ -380,21 +382,21 @@ const App: React.FC = () => {
                 </div>
 
                 {(evaluation || aiHint) && (
-                  <div className="h-[400px] border-t border-white/5 bg-[#05070d] p-10 overflow-y-auto custom-scroll animate-in slide-in-from-bottom-full duration-500">
-                    <div className="max-w-4xl mx-auto space-y-10">
+                  <div className="h-[400px] border-t border-[#e8e3db] bg-white p-8 overflow-y-auto custom-scroll animate-in slide-in-from-bottom-full duration-500">
+                    <div className="max-w-3xl mx-auto space-y-8">
                       {aiHint && (
-                        <div className="p-8 bg-indigo-600/10 border border-indigo-500/20 rounded-[32px] text-center italic text-xl text-indigo-200">
+                        <div className="p-6 bg-[#eff6ff] border border-[#2563eb]/10 rounded-2xl text-center italic text-lg text-[#2563eb]">
                           "{aiHint}"
                         </div>
                       )}
                       {evaluation && (
-                        <div className="space-y-10">
+                        <div className="space-y-8">
                           <div className="flex items-center justify-between">
-                            <h3 className={`text-3xl font-black uppercase tracking-tighter italic ${evaluation.status === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                              {evaluation.status === 'success' ? '✓ Kernel Verified' : '⚠ Logical Error'}
+                            <h3 className={`text-2xl font-serif tracking-tight ${evaluation.status === 'success' ? 'text-[#16a34a]' : 'text-rose-600'}`}>
+                              {evaluation.status === 'success' ? '✓ Logic Verified' : '⚠ Logic Error'}
                             </h3>
                           </div>
-                          <p className="text-xl text-slate-400 font-medium leading-relaxed italic">"{evaluation.feedback}"</p>
+                          <p className="text-lg text-[#6b6560] leading-relaxed italic">"{evaluation.feedback}"</p>
                           <div className="h-[350px] w-full"><Visualizer data={evaluation.visualizationData || []} /></div>
                         </div>
                       )}
@@ -408,16 +410,23 @@ const App: React.FC = () => {
           </div>
         )}
         {view === 'CareerPath' && (
-          <div className="max-w-[1600px] mx-auto px-12 py-40 space-y-32 animate-in fade-in duration-1000">
-            <div className="text-center space-y-8">
-              <span className="text-[11px] font-black text-indigo-400 uppercase tracking-[0.8em]">Career Strategist Unit</span>
-              <h1 className="text-9xl font-black text-white tracking-tighter uppercase italic">Pathfinder.</h1>
-              <p className="text-3xl text-slate-500 font-medium max-w-5xl mx-auto leading-tight">Tell Aura your goal to design your personalized skill path.</p>
+          <div className="max-w-5xl mx-auto px-6 py-24 space-y-24 animate-in fade-in duration-1000">
+            <div className="text-center space-y-6">
+              <span className="text-sm font-semibold text-[#9a9088] uppercase tracking-widest">Career Strategy</span>
+              <h1 className="text-7xl font-serif tracking-tight text-[#1a1714]">Pathfinder.</h1>
+              <p className="text-xl text-[#6b6560] font-medium max-w-2xl mx-auto leading-tight">Tell Aura your dream role to design your personalized skill path.</p>
             </div>
-            <div className="bg-[#0b0e14] border border-white/5 rounded-[100px] p-32 space-y-16 text-center shadow-3xl relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-indigo-600/5 blur-[150px] -z-10 animate-neural"></div>
-              <input value={interestInput} onChange={(e) => setInterestInput(e.target.value)} className="w-full bg-black/40 border-2 border-white/10 rounded-[48px] px-16 py-12 text-4xl text-white outline-none focus:border-indigo-600 transition-all text-center font-black placeholder:text-slate-900 italic" placeholder="e.g. Lead Robotics Engineer, Data Scientist..." />
-              <button onClick={generateNewRoadmap} disabled={!interestInput} className="w-full bg-white text-black py-12 rounded-[48px] text-4xl font-black active:scale-95 disabled:opacity-50 hover:bg-indigo-50 transition-all shadow-3xl uppercase tracking-tighter italic">Generate Strategy</button>
+            <div className="bg-white border border-[#e8e3db] rounded-[48px] p-12 md:p-20 space-y-12 text-center shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-[#f5c842]/5 blur-[120px] -z-10 animate-pulse"></div>
+              <input value={interestInput} onChange={(e) => setInterestInput(e.target.value)} className="w-full bg-[#faf8f5] border border-[#e8e3db] rounded-3xl px-8 py-6 text-3xl text-[#1a1714] outline-none focus:border-[#f5c842] transition-all text-center font-medium placeholder:text-[#b0a89e]" placeholder="e.g. Data Scientist, Web Developer..." />
+              <button 
+                onClick={generateNewRoadmap} 
+                disabled={!interestInput} 
+                className="w-full py-6 rounded-3xl text-3xl font-semibold transition-all active:scale-[0.98] disabled:opacity-50 shadow-lg"
+                style={{ background: '#f5c842', color: '#1a1714' }}
+              >
+                Generate Path
+              </button>
             </div>
             {progress?.roadmapData && <CareerArchitect data={progress.roadmapData} />}
           </div>
@@ -428,17 +437,17 @@ const App: React.FC = () => {
         isOpen={isAuraOpen} 
         onClose={() => setIsAuraOpen(false)} 
         onOpen={() => setIsAuraOpen(true)}
-        context={currentQuest ? `Current Quest: ${currentQuest.title}` : 'General Coaching Interface'}
+        context={currentQuest ? `Current Quest: ${currentQuest.title}` : 'Mentorship Interface'}
         personalization={progress?.personalization}
       />
 
       {loadingTask && <LoadingOverlay message={loadingTask.message} subMessage={loadingTask.sub} />}
       {notification && <Notification title={notification.title} message={notification.message} icon={notification.icon} onClose={() => setNotification(null)} />}
       <style>{`
-        @keyframes neural-drift { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-        .animate-neural { animation: neural-drift 30s infinite ease-in-out; }
+        @keyframes ambient-drift { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .animate-ambient { animation: ambient-drift 30s infinite ease-in-out; }
         .custom-scroll::-webkit-scrollbar { width: 5px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.05); border-radius: 10px; }
       `}</style>
     </div>
   );

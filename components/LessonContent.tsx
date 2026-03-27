@@ -34,15 +34,15 @@ function buildPages(
   summary: string,
 ): Page[] {
   const PAGE_META = [
-    { title: 'Introduction',    subtitle: 'Why this matters',          icon: '◎', color: '#6366f1' },
-    { title: 'Core Concept',    subtitle: 'The big idea',              icon: '◈', color: '#8b5cf6' },
-    { title: 'How It Works',    subtitle: 'Under the hood',            icon: '⬡', color: '#06b6d4' },
-    { title: 'In Practice',     subtitle: 'Real examples',             icon: '◆', color: '#10b981' },
-    { title: 'Edge Cases',      subtitle: 'Watch out for these',       icon: '⚠️', color: '#f59e0b' },
-    { title: 'Patterns',        subtitle: 'Best practices',            icon: '◉', color: '#f43f5e' },
-    { title: 'Deep Dive',       subtitle: 'Going further',             icon: '◑', color: '#a78bfa' },
-    { title: 'Putting It Together', subtitle: 'The full picture',      icon: '⬟', color: '#34d399' },
-    { title: 'Summary',         subtitle: 'What you learned today',    icon: '✦', color: '#6366f1' },
+    { title: 'Introduction',    subtitle: 'The Big Picture',          icon: '◎', color: '#f5c842' },
+    { title: 'Core Concept',    subtitle: 'The Foundation',           icon: '◈', color: '#f5c842' },
+    { title: 'How It Works',    subtitle: 'Under the Hood',           icon: '⬡', color: '#f5c842' },
+    { title: 'In Practice',     subtitle: 'Real Examples',            icon: '◆', color: '#f5c842' },
+    { title: 'Edge Cases',      subtitle: 'Watch Out',                icon: '⚠️', color: '#f5c842' },
+    { title: 'Patterns',        subtitle: 'Best Practices',           icon: '◉', color: '#f5c842' },
+    { title: 'Deep Dive',       subtitle: 'Going Further',            icon: '◑', color: '#f5c842' },
+    { title: 'Putting It Together', subtitle: 'The Full Picture',     icon: '⬟', color: '#f5c842' },
+    { title: 'Summary',         subtitle: 'Key Takeaways',            icon: '✦', color: '#f5c842' },
   ];
 
   const pages: Page[] = [];
@@ -223,12 +223,12 @@ const LessonContent: React.FC<LessonContentProps> = ({
       <style>{`
         .lc-root {
           --accent: ${page.color};
-          --bg: #04050d;
-          --surface: rgba(10,12,26,0.85);
-          --border: rgba(255,255,255,0.06);
-          --text: #d1d5db;
-          --text-dim: rgba(148,163,184,0.55);
-          --font-display: 'Fraunces', Georgia, serif;
+          --bg: #faf8f5;
+          --surface: #ffffff;
+          --border: #e8e3db;
+          --text: #1a1714;
+          --text-dim: #6b6560;
+          --font-display: 'DM Serif Display', serif;
           --font-body: 'DM Sans', sans-serif;
           --font-mono: 'JetBrains Mono', monospace;
           font-family: var(--font-body);
@@ -249,29 +249,28 @@ const LessonContent: React.FC<LessonContentProps> = ({
           border: 1px solid var(--border);
           border-radius: 32px;
           overflow: hidden;
-          box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 32px 100px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05);
-          backdrop-filter: blur(40px);
+          box-shadow: 0 10px 30px rgba(0,0,0,0.03);
         }
 
         .lc-topbar {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 18px 32px;
+          padding: 16px 32px;
           border-bottom: 1px solid var(--border);
-          background: rgba(4,5,13,0.7);
+          background: #faf8f5;
           flex-shrink: 0;
         }
         .lc-chapter-label {
           font-family: var(--font-mono);
           font-size: 10px;
-          letter-spacing: 0.25em;
+          letter-spacing: 0.15em;
           color: var(--text-dim);
           text-transform: uppercase;
           font-weight: 700;
         }
         .lc-chapter-label span {
-          color: var(--accent);
+          color: #d97706;
         }
         .lc-page-counter {
           font-family: var(--font-mono);
@@ -279,23 +278,22 @@ const LessonContent: React.FC<LessonContentProps> = ({
           color: var(--text-dim);
           letter-spacing: 0.1em;
         }
-        .lc-page-counter strong { color: var(--accent); }
+        .lc-page-counter strong { color: #d97706; }
 
         .lc-progress-strip {
           height: 3px;
-          background: rgba(255,255,255,0.04);
+          background: #faf8f5;
           flex-shrink: 0;
           position: relative;
         }
         .lc-progress-fill {
           height: 100%;
           transition: width 0.7s cubic-bezier(0.19, 1, 0.22, 1);
-          background: linear-gradient(90deg, var(--accent), #fff);
-          box-shadow: 0 0 15px var(--accent);
+          background: #f5c842;
         }
 
         .lc-page-header {
-          padding: 48px 48px 32px;
+          padding: 40px 48px 24px;
           border-bottom: 1px solid var(--border);
           flex-shrink: 0;
           position: relative;
@@ -308,8 +306,8 @@ const LessonContent: React.FC<LessonContentProps> = ({
           top: 50%;
           transform: translateY(-50%);
           font-size: 100px;
-          color: var(--accent);
-          opacity: 0.04;
+          color: #f5c842;
+          opacity: 0.1;
           line-height: 1;
           pointer-events: none;
           font-family: var(--font-mono);
@@ -317,38 +315,38 @@ const LessonContent: React.FC<LessonContentProps> = ({
         .lc-page-tag {
           display: inline-flex;
           align-items: center;
-          gap: 10px;
-          background: color-mix(in srgb, var(--accent) 15%, transparent);
-          border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+          gap: 8px;
+          background: #f5c84215;
+          border: 1px solid #f5c84230;
           border-radius: 100px;
-          padding: 6px 16px 6px 12px;
-          margin-bottom: 20px;
+          padding: 4px 12px;
+          margin-bottom: 16px;
         }
-        .lc-page-tag-icon { font-size: 14px; color: var(--accent); }
+        .lc-page-tag-icon { font-size: 12px; color: #d97706; }
         .lc-page-tag-text {
           font-family: var(--font-mono);
           font-size: 10px;
-          letter-spacing: 0.2em;
+          letter-spacing: 0.1em;
           text-transform: uppercase;
-          color: var(--accent);
+          color: #d97706;
           font-weight: 800;
         }
         .lc-page-title {
           font-family: var(--font-display);
-          font-size: clamp(32px, 4vw, 44px);
-          font-weight: 800;
-          line-height: 1.1;
-          color: #fff;
-          margin: 0 0 10px;
-          letter-spacing: -0.02em;
+          font-size: clamp(28px, 3.5vw, 36px);
+          font-weight: 400;
+          line-height: 1.2;
+          color: var(--text);
+          margin: 0 0 8px;
+          letter-spacing: -0.01em;
           font-style: italic;
         }
         .lc-page-subtitle {
           font-family: var(--font-body);
-          font-size: 14px;
-          font-weight: 500;
+          font-size: 13px;
+          font-weight: 600;
           color: var(--text-dim);
-          letter-spacing: 0.04em;
+          letter-spacing: 0.02em;
           text-transform: uppercase;
         }
 
@@ -356,109 +354,109 @@ const LessonContent: React.FC<LessonContentProps> = ({
           flex: 1;
           min-height: 0;
           overflow-y: auto;
-          padding: 48px;
+          padding: 40px 48px;
           scroll-behavior: smooth;
         }
         .lc-content::-webkit-scrollbar { width: 4px; }
-        .lc-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        .lc-content::-webkit-scrollbar-thumb { background: #e8e3db; border-radius: 4px; }
 
         .lc-text, .lc-anim {
           animation: lcFadeUp 0.6s cubic-bezier(0.19, 1, 0.22, 1) both;
         }
         @keyframes lcFadeUp {
-          from { opacity: 0; transform: translateY(20px); }
+          from { opacity: 0; transform: translateY(15px); }
           to   { opacity: 1; transform: translateY(0); }
         }
 
         .lc-text {
           font-family: var(--font-body);
-          font-size: 17px;
-          line-height: 1.85;
-          color: #94a3b8;
-          margin-bottom: 24px;
+          font-size: 16px;
+          line-height: 1.75;
+          color: #4a4540;
+          margin-bottom: 20px;
           font-weight: 400;
         }
         .lc-text:first-of-type {
-          font-size: 20px;
-          color: #e2e8f0;
-          font-weight: 300;
+          font-size: 18px;
+          color: #1a1714;
+          font-weight: 500;
           line-height: 1.6;
         }
 
         .lc-code-block {
-          border-radius: 20px;
+          border-radius: 16px;
           overflow: hidden;
-          border: 1px solid rgba(255,255,255,0.1);
-          margin: 32px 0;
-          box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+          border: 1px solid #e8e3db;
+          margin: 24px 0;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         }
         .lc-code-header {
           display: flex;
           align-items: center;
-          gap: 12px;
-          padding: 12px 20px;
-          background: #0b0e14;
-          border-bottom: 1px solid rgba(255,255,255,0.05);
+          gap: 10px;
+          padding: 10px 16px;
+          background: #faf8f5;
+          border-bottom: 1px solid #e8e3db;
         }
-        .lc-code-dots { display: flex; gap: 6px; }
-        .lc-code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .lc-code-dots { display: flex; gap: 5px; }
+        .lc-code-dots span { width: 8px; height: 8px; border-radius: 50%; }
         .lc-code-label {
           font-family: var(--font-mono);
-          font-size: 11px;
-          color: rgba(148,163,184,0.6);
-          letter-spacing: 0.1em;
+          font-size: 10px;
+          color: #9a9088;
+          letter-spacing: 0.05em;
           flex: 1;
           font-weight: 600;
         }
         .lc-copy-btn {
           font-family: var(--font-mono);
-          font-size: 10px;
-          letter-spacing: 0.15em;
-          color: #fff;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 8px;
+          font-size: 9px;
+          letter-spacing: 0.1em;
+          color: #1a1714;
+          background: #ffffff;
+          border: 1px solid #e8e3db;
+          border-radius: 6px;
           cursor: pointer;
-          padding: 4px 10px;
+          padding: 3px 8px;
           transition: all 0.2s;
         }
-        .lc-copy-btn:hover { background: rgba(255,255,255,0.1); color: var(--accent); }
+        .lc-copy-btn:hover { background: #faf8f5; color: #d97706; }
 
         .lc-code-pre {
-          background: #010208;
+          background: #ffffff;
           margin: 0;
-          padding: 28px;
+          padding: 24px;
           overflow-x: auto;
           font-family: var(--font-mono);
-          font-size: 14px;
-          line-height: 1.8;
-          color: #a5b4fc;
+          font-size: 13px;
+          line-height: 1.7;
+          color: #1a1714;
         }
 
         .lc-callout {
-          border-radius: 20px;
+          border-radius: 16px;
           border: 1px solid;
-          padding: 24px 28px;
-          margin: 28px 0;
+          padding: 20px 24px;
+          margin: 24px 0;
         }
         .lc-callout-header {
           display: flex;
           align-items: center;
-          gap: 12px;
-          margin-bottom: 12px;
+          gap: 10px;
+          margin-bottom: 8px;
         }
-        .lc-callout-icon { font-size: 20px; }
+        .lc-callout-icon { font-size: 18px; }
         .lc-callout-label {
           font-family: var(--font-mono);
-          font-size: 10px;
-          letter-spacing: 0.25em;
+          font-size: 9px;
+          letter-spacing: 0.15em;
           text-transform: uppercase;
           font-weight: 800;
         }
         .lc-callout-body {
           font-family: var(--font-body);
-          font-size: 15.5px;
-          line-height: 1.7;
+          font-size: 14.5px;
+          line-height: 1.6;
           margin: 0;
           font-style: italic;
           opacity: 0.9;
@@ -466,9 +464,9 @@ const LessonContent: React.FC<LessonContentProps> = ({
 
         .lc-footer {
           flex-shrink: 0;
-          padding: 20px 32px;
+          padding: 16px 32px;
           border-top: 1px solid var(--border);
-          background: rgba(4,5,13,0.6);
+          background: #faf8f5;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -478,115 +476,115 @@ const LessonContent: React.FC<LessonContentProps> = ({
         .lc-nav-btn {
           display: flex;
           align-items: center;
-          gap: 10px;
-          padding: 12px 24px;
-          border-radius: 16px;
+          gap: 8px;
+          padding: 10px 20px;
+          border-radius: 12px;
           font-family: var(--font-mono);
-          font-size: 11px;
-          letter-spacing: 0.15em;
+          font-size: 10px;
+          letter-spacing: 0.1em;
           text-transform: uppercase;
           cursor: pointer;
           transition: all 0.2s;
           border: 1px solid var(--border);
-          background: rgba(255,255,255,0.03);
+          background: #ffffff;
           color: var(--text-dim);
           font-weight: 700;
         }
         .lc-nav-btn:hover:not(:disabled) {
-          background: rgba(255,255,255,0.06);
-          color: #fff;
+          background: #faf8f5;
+          color: #1a1714;
           transform: translateY(-1px);
         }
-        .lc-nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+        .lc-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
         .lc-nav-btn.primary {
-          background: color-mix(in srgb, var(--accent) 15%, transparent);
-          border-color: color-mix(in srgb, var(--accent) 40%, transparent);
-          color: var(--accent);
+          background: #f5c842;
+          border-color: #f5c842;
+          color: #1a1714;
         }
         .lc-nav-btn.cta {
-          background: #fff;
+          background: #1a1714;
           border-color: transparent;
-          color: #000;
-          padding: 12px 32px;
-          box-shadow: 0 10px 30px rgba(255,255,255,0.15);
+          color: #ffffff;
+          padding: 10px 28px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        .lc-nav-btn.cta:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 15px 40px rgba(255,255,255,0.2); }
+        .lc-nav-btn.cta:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
 
-        .lc-progress-bar { display: flex; align-items: center; gap: 8px; flex: 1; justify-content: center; }
+        .lc-progress-bar { display: flex; align-items: center; gap: 6px; flex: 1; justify-content: center; }
         .lc-dot {
-          width: 8px;
-          height: 8px;
+          width: 6px;
+          height: 6px;
           border-radius: 50%;
-          background: rgba(255,255,255,0.1);
+          background: #e8e3db;
           border: none;
           cursor: pointer;
           padding: 0;
           transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
         }
-        .lc-dot.visited { background: color-mix(in srgb, var(--accent) 40%, transparent); }
+        .lc-dot.visited { background: #9a9088; }
         .lc-dot.active {
-          background: var(--accent);
-          width: 24px;
-          border-radius: 4px;
-          box-shadow: 0 0 20px var(--accent);
+          background: #f5c842;
+          width: 18px;
+          border-radius: 3px;
         }
 
-        .lc-summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 32px 0; }
+        .lc-summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px 0; }
         .lc-summary-card {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.06);
-          border-radius: 20px;
-          padding: 24px;
+          background: #ffffff;
+          border: 1px solid #e8e3db;
+          border-radius: 16px;
+          padding: 20px;
           text-align: center;
         }
         .lc-summary-card-num {
           font-family: var(--font-mono);
-          font-size: 32px;
+          font-size: 28px;
           font-weight: 800;
-          color: var(--accent);
+          color: #d97706;
           line-height: 1;
-          margin-bottom: 8px;
+          margin-bottom: 4px;
         }
-        .lc-summary-card-label { font-family: var(--font-body); font-size: 13px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; }
+        .lc-summary-card-label { font-family: var(--font-body); font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
 
         .lc-completion-banner {
-          background: color-mix(in srgb, #10b981 10%, transparent);
-          border: 1px solid color-mix(in srgb, #10b981 30%, transparent);
-          border-radius: 20px;
-          padding: 28px;
+          background: #16a34a08;
+          border: 1px solid #16a34a20;
+          border-radius: 16px;
+          padding: 24px;
           display: flex;
           align-items: center;
-          gap: 20px;
-          margin-top: 32px;
+          gap: 16px;
+          margin-top: 24px;
         }
-        .lc-completion-icon { font-size: 32px; color: #10b981; }
-        .lc-completion-text { font-family: var(--font-display); font-size: 18px; color: #fff; line-height: 1.4; font-style: italic; font-weight: 700; }
+        .lc-completion-icon { font-size: 24px; color: #16a34a; }
+        .lc-completion-text { font-family: var(--font-display); font-size: 17px; color: #1a1714; line-height: 1.4; font-style: italic; font-weight: 400; }
 
         .lc-kbd-hint {
           font-family: var(--font-mono);
-          font-size: 9px;
-          letter-spacing: 0.15em;
-          color: var(--text-dim);
+          font-size: 8px;
+          letter-spacing: 0.1em;
+          color: #9a9088;
           text-align: center;
-          padding: 12px 0 0;
+          padding: 10px 0 0;
           text-transform: uppercase;
         }
         kbd {
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 6px;
-          padding: 2px 6px;
-          margin: 0 4px;
+          background: #ffffff;
+          border: 1px solid #e8e3db;
+          border-radius: 4px;
+          padding: 1px 5px;
+          margin: 0 3px;
         }
       `}</style>
 
-      <div className="lc-pamphlet">
-        <div className="lc-topbar">
+      <div className="lc-pamphlet relative">
+        <div className="absolute -left-8 top-1/2 -translate-y-1/2 rail-text opacity-20 pointer-events-none z-0">MODULE_CONTENT</div>
+        <div className="lc-topbar relative z-10">
           <span className="lc-chapter-label">
-            PYQUEST / <span>NEURAL BENCHMARK</span>
+            PYQUEST / <span>LEARNING MODULE</span>
           </span>
           <span className="lc-page-counter">
-            MODULE <strong>{currentPage + 1}</strong> / {pages.length}
+            PAGE <strong>{currentPage + 1}</strong> / {pages.length}
           </span>
         </div>
 
@@ -631,8 +629,8 @@ const LessonContent: React.FC<LessonContentProps> = ({
                 <div className="lc-completion-banner">
                   <span className="lc-completion-icon">✓</span>
                   <div>
-                    <div className="lc-completion-text">Uplink Complete. Architectural patterns synthesized.</div>
-                    <p className="text-sm text-slate-500 mt-1">Ready to initialize the logical kernel? The challenge awaits.</p>
+                    <div className="lc-completion-text">Module Complete. Concepts mastered.</div>
+                    <p className="text-sm text-slate-500 mt-1">Ready to put your knowledge to the test? The challenge awaits.</p>
                   </div>
                 </div>
               )}

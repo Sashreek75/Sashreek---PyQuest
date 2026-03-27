@@ -44,14 +44,14 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ message, subMessage }) 
 
         <div className="grid grid-cols-2 gap-4">
           <div className="text-left font-mono text-[8px] text-slate-700 space-y-1">
-            <div>&gt; CALL_AURA_KERNEL</div>
-            <div>&gt; AUTH_SECURE_LINK</div>
-            <div>&gt; STATUS: OK</div>
+            <div>&gt; CONNECTING_TO_AURA</div>
+            <div>&gt; SECURE_CONNECTION</div>
+            <div>&gt; STATUS: READY</div>
           </div>
           <div className="text-right font-mono text-[8px] text-slate-700 space-y-1">
-            <div>BUFFERING_TENSORS...</div>
+            <div>PREPARING_LESSON...</div>
             <div>LATENCY: 42MS</div>
-            <div>NODES: ACTIVE</div>
+            <div>STATUS: ONLINE</div>
           </div>
         </div>
       </div>

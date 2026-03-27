@@ -112,6 +112,8 @@ export interface RoadmapNode {
   tags: string[];
   dependencies: string[];
   recommendedResources: string[];
+  keySkills?: string[];
+  prerequisites?: string[];
   x: number;
   y: number;
 }

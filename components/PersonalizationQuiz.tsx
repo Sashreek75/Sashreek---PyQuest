@@ -118,7 +118,7 @@ const PersonalizationQuiz: React.FC<PersonalizationQuizProps> = ({ onComplete })
     }
   };
 
-  if (isProcessing) return <LoadingOverlay message="Synthesizing Your Destiny" subMessage="Mapping your abstract goals to a professional curriculum..." />;
+  if (isProcessing) return <LoadingOverlay message="Creating Your Path" subMessage="Mapping your goals to a personalized learning journey..." />;
 
   const current = steps[step];
 
@@ -136,7 +136,7 @@ const PersonalizationQuiz: React.FC<PersonalizationQuizProps> = ({ onComplete })
         </div>
 
         <div className="text-center space-y-4 mb-14 animate-in fade-in slide-in-from-bottom-2 duration-700">
-          <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-[0.4em]">Neural Profiling — Node {step + 1}/{steps.length}</span>
+          <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-[0.4em]">Personalizing Your Journey — Step {step + 1}/{steps.length}</span>
           <h2 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight leading-none">{current.title}</h2>
           <p className="text-slate-400 font-medium text-lg max-w-lg mx-auto leading-relaxed">{current.sub}</p>
         </div>
@@ -166,7 +166,7 @@ const PersonalizationQuiz: React.FC<PersonalizationQuizProps> = ({ onComplete })
            </button>
            <div className="flex items-center gap-3">
              <div className="w-1.5 h-1.5 rounded-full bg-indigo-500/50 animate-pulse"></div>
-             <span className="text-[8px] font-bold text-slate-800 uppercase tracking-[0.3em]">Pathfinder Kernel V2.0 Active</span>
+             <span className="text-[8px] font-bold text-slate-800 uppercase tracking-[0.3em]">AI Career Strategist Active</span>
            </div>
         </div>
       </div>

@@ -48,21 +48,21 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
   // Enhanced neural tracks with growth-based activation
   const neuralTracks = useMemo(() => {
     const tracks = [
-      { d: "M50 20 Q 30 20, 20 40 T 30 70", color: "#f472b6", delay: "0s", active: growth > 0.1 },
-      { d: "M50 20 Q 70 20, 80 40 T 70 70", color: "#60a5fa", delay: "1.5s", active: growth > 0.2 },
-      { d: "M50 15 Q 50 40, 30 50 T 20 80", color: "#fbbf24", delay: "3s", active: growth > 0.3 },
-      { d: "M50 15 Q 50 40, 70 50 T 80 80", color: "#4f46e5", delay: "0.5s", active: growth > 0.15 },
-      { d: "M35 30 Q 50 30, 65 30", color: "#a78bfa", delay: "2.2s", active: growth > 0.4 },
-      { d: "M25 55 Q 50 55, 75 55", color: "#34d399", delay: "1.1s", active: growth > 0.25 },
-      { d: "M50 20 V 85", color: "#ffffff", delay: "4s", active: true }, // Neural Stem always active
-      { d: "M40 35 Q 50 45, 60 35", color: "#06b6d4", delay: "3.5s", active: growth > 0.5 },
-      { d: "M30 65 Q 50 70, 70 65", color: "#ec4899", delay: "2.8s", active: growth > 0.6 },
-      { d: "M25 45 L 50 50 L 75 45", color: "#f59e0b", delay: "1.8s", active: growth > 0.45 },
-      { d: "M35 75 Q 50 80, 65 75", color: "#8b5cf6", delay: "4.2s", active: growth > 0.7 },
-      { d: "M22 30 Q 35 25, 50 28", color: "#10b981", delay: "3.2s", active: growth > 0.35 },
-      { d: "M78 30 Q 65 25, 50 28", color: "#3b82f6", delay: "2.5s", active: growth > 0.55 },
-      { d: "M50 20 Q 40 50, 35 85", color: "#d946ef", delay: "5s", active: growth > 0.65 },
-      { d: "M50 20 Q 60 50, 65 85", color: "#14b8a6", delay: "4.5s", active: growth > 0.75 }
+      { d: "M50 20 Q 30 20, 20 40 T 30 70", color: "#f5c842", delay: "0s", active: growth > 0.1 },
+      { d: "M50 20 Q 70 20, 80 40 T 70 70", color: "#d97706", delay: "1.5s", active: growth > 0.2 },
+      { d: "M50 15 Q 50 40, 30 50 T 20 80", color: "#f5c842", delay: "3s", active: growth > 0.3 },
+      { d: "M50 15 Q 50 40, 70 50 T 80 80", color: "#d97706", delay: "0.5s", active: growth > 0.15 },
+      { d: "M35 30 Q 50 30, 65 30", color: "#f5c842", delay: "2.2s", active: growth > 0.4 },
+      { d: "M25 55 Q 50 55, 75 55", color: "#d97706", delay: "1.1s", active: growth > 0.25 },
+      { d: "M50 20 V 85", color: "#d97706", delay: "4s", active: true }, // Core Stem
+      { d: "M40 35 Q 50 45, 60 35", color: "#f5c842", delay: "3.5s", active: growth > 0.5 },
+      { d: "M30 65 Q 50 70, 70 65", color: "#d97706", delay: "2.8s", active: growth > 0.6 },
+      { d: "M25 45 L 50 50 L 75 45", color: "#f5c842", delay: "1.8s", active: growth > 0.45 },
+      { d: "M35 75 Q 50 80, 65 75", color: "#d97706", delay: "4.2s", active: growth > 0.7 },
+      { d: "M22 30 Q 35 25, 50 28", color: "#f5c842", delay: "3.2s", active: growth > 0.35 },
+      { d: "M78 30 Q 65 25, 50 28", color: "#d97706", delay: "2.5s", active: growth > 0.55 },
+      { d: "M50 20 Q 40 50, 35 85", color: "#f5c842", delay: "5s", active: growth > 0.65 },
+      { d: "M50 20 Q 60 50, 65 85", color: "#d97706", delay: "4.5s", active: growth > 0.75 }
     ];
     
     return tracks.filter(t => t.active);
@@ -70,11 +70,11 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
 
   // Cortical regions that light up based on activity
   const corticalRegions = useMemo(() => [
-    { cx: 35, cy: 35, label: "Logic", color: "#4f46e5", intensity: growth > 0.2 ? 0.3 : 0.1 },
-    { cx: 65, cy: 35, label: "Memory", color: "#ec4899", intensity: growth > 0.3 ? 0.3 : 0.1 },
-    { cx: 50, cy: 50, label: "Processing", color: "#f59e0b", intensity: growth > 0.4 ? 0.4 : 0.1 },
-    { cx: 30, cy: 65, label: "Analysis", color: "#10b981", intensity: growth > 0.5 ? 0.3 : 0.1 },
-    { cx: 70, cy: 65, label: "Synthesis", color: "#06b6d4", intensity: growth > 0.6 ? 0.3 : 0.1 }
+    { cx: 35, cy: 35, label: "Logic", color: "#d97706", intensity: growth > 0.2 ? 0.3 : 0.1 },
+    { cx: 65, cy: 35, label: "Memory", color: "#f5c842", intensity: growth > 0.3 ? 0.3 : 0.1 },
+    { cx: 50, cy: 50, label: "Processing", color: "#d97706", intensity: growth > 0.4 ? 0.4 : 0.1 },
+    { cx: 30, cy: 65, label: "Analysis", color: "#f5c842", intensity: growth > 0.5 ? 0.3 : 0.1 },
+    { cx: 70, cy: 65, label: "Synthesis", color: "#d97706", intensity: growth > 0.6 ? 0.3 : 0.1 }
   ], [growth]);
 
   return (
@@ -105,17 +105,17 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
             
             {/* Dynamic gradient based on growth */}
             <radialGradient id="lobe-gradient" cx="50%" cy="40%" r="60%">
-              <stop offset="0%" stopColor="#4f46e5" stopOpacity={0.2 + growth * 0.3} />
-              <stop offset="50%" stopColor="#ec4899" stopOpacity={0.15 + growth * 0.2} />
-              <stop offset="100%" stopColor="#010208" stopOpacity="0.05" />
+              <stop offset="0%" stopColor="#f5c842" stopOpacity={0.2 + growth * 0.3} />
+              <stop offset="50%" stopColor="#d97706" stopOpacity={0.15 + growth * 0.2} />
+              <stop offset="100%" stopColor="#faf8f5" stopOpacity="0.05" />
             </radialGradient>
 
             {/* Pulsing gradient for active learning */}
             <radialGradient id="pulse-gradient">
-              <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.8">
+              <stop offset="0%" stopColor="#f5c842" stopOpacity="0.8">
                 <animate attributeName="stop-opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite" />
               </stop>
-              <stop offset="100%" stopColor="#fbbf24" stopOpacity="0" />
+              <stop offset="100%" stopColor="#f5c842" stopOpacity="0" />
             </radialGradient>
           </defs>
 
@@ -128,16 +128,16 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
           <g className="neural-stem" filter="url(#neural-bloom)">
             <path 
               d="M50 85 Q 50 105, 52 115" 
-              stroke="rgba(79, 70, 229, 0.4)" 
+              stroke="rgba(217, 119, 6, 0.4)" 
               strokeWidth="1.5" 
               fill="none"
               style={{ strokeDasharray: '10', strokeDashoffset: '0' }}
             >
               <animate attributeName="stroke-dashoffset" from="0" to="20" dur="2s" repeatCount="indefinite" />
             </path>
-            <path d="M50 85 Q 50 105, 48 115" stroke="rgba(79, 70, 229, 0.2)" strokeWidth="0.8" fill="none" />
-            <circle cx="50" cy="115" r="1.5" fill="#4f46e5" className="animate-pulse" />
-            <circle cx="50" cy="90" r="1" fill="#a78bfa" opacity="0.6">
+            <path d="M50 85 Q 50 105, 48 115" stroke="rgba(217, 119, 6, 0.2)" strokeWidth="0.8" fill="none" />
+            <circle cx="50" cy="115" r="1.5" fill="#d97706" className="animate-pulse" />
+            <circle cx="50" cy="90" r="1" fill="#f5c842" opacity="0.6">
               <animate attributeName="r" values="1;2;1" dur="3s" repeatCount="indefinite" />
               <animate attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite" />
             </circle>
@@ -257,9 +257,9 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
           </g>
 
           {/* Growth Indicators (hemisphere glows) */}
-          <circle cx="35" cy="40" r={8 + growth * 15} fill="#f472b6" opacity={0.03 + growth * 0.12} filter="blur(10px)" />
-          <circle cx="65" cy="40" r={8 + growth * 12} fill="#60a5fa" opacity={0.03 + growth * 0.12} filter="blur(10px)" />
-          <circle cx="50" cy="65" r={8 + growth * 18} fill="#fbbf24" opacity={0.03 + growth * 0.15} filter="blur(12px)" />
+          <circle cx="35" cy="40" r={8 + growth * 15} fill="#f5c842" opacity={0.03 + growth * 0.12} filter="blur(10px)" />
+          <circle cx="65" cy="40" r={8 + growth * 12} fill="#d97706" opacity={0.03 + growth * 0.12} filter="blur(10px)" />
+          <circle cx="50" cy="65" r={8 + growth * 18} fill="#f5c842" opacity={0.03 + growth * 0.15} filter="blur(12px)" />
 
           {/* Synaptic connection nodes */}
           {!isBackground && activePathways > 5 && (
@@ -275,7 +275,7 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
                     cx={cx}
                     cy={cy}
                     r="0.5"
-                    fill="#ffffff"
+                    fill="#1a1714"
                     opacity="0.4"
                   >
                     <animate 
@@ -297,7 +297,7 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
                 <circle
                   key={i}
                   r="0.4"
-                  fill="#a78bfa"
+                  fill="#d97706"
                   opacity="0.6"
                 >
                   <animateMotion
@@ -315,15 +315,15 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
         {!isBackground && (
           <div className="growth-indicator">
             <div className="growth-stage">
-              {growth < 0.2 && "Forming..."}
-              {growth >= 0.2 && growth < 0.5 && "Developing..."}
-              {growth >= 0.5 && growth < 0.8 && "Expanding..."}
-              {growth >= 0.8 && "Optimized"}
+              {growth < 0.2 && "Rooting..."}
+              {growth >= 0.2 && growth < 0.5 && "Sprouting..."}
+              {growth >= 0.5 && growth < 0.8 && "Branching..."}
+              {growth >= 0.8 && "Flourishing"}
             </div>
             <div className="growth-metrics">
-              <span>{activePathways} pathways</span>
+              <span>{activePathways} connections</span>
               <span className="separator">•</span>
-              <span>{Math.floor(growth * 100)}% mature</span>
+              <span>{Math.floor(growth * 100)}% developed</span>
             </div>
           </div>
         )}
@@ -341,10 +341,10 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
         }
 
         .background-mode { 
-          opacity: 0.15; 
+          opacity: 0.1; 
           transform: scale(1.8); 
           pointer-events: none;
-          filter: blur(2px);
+          filter: blur(4px);
         }
         
         .interactive-mode { 
@@ -365,7 +365,7 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
           width: 100%;
           height: 100%;
           overflow: visible;
-          filter: drop-shadow(0 0 40px rgba(79, 70, 229, 0.15));
+          filter: drop-shadow(0 0 40px rgba(217, 119, 6, 0.1));
         }
 
         .cortex-outline {
@@ -377,7 +377,7 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
 
         .fissure {
           fill: none;
-          stroke: rgba(255, 255, 255, 0.1);
+          stroke: rgba(26, 23, 20, 0.1);
           stroke-width: 0.3;
           stroke-linecap: round;
           stroke-dasharray: 2, 3;
@@ -385,7 +385,7 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
         }
 
         .fissure.primary {
-          stroke: rgba(255, 255, 255, 0.15);
+          stroke: rgba(26, 23, 20, 0.15);
           stroke-width: 0.5;
         }
 
@@ -400,9 +400,9 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
         }
 
         .region-label {
-          font-family: 'Inter', sans-serif;
+          font-family: 'DM Sans', sans-serif;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 1px;
           animation: label-pulse 3s ease-in-out infinite;
         }
 
@@ -416,22 +416,22 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
         }
 
         .growth-stage {
-          font-size: 14px;
-          font-weight: 900;
-          color: rgba(99, 102, 241, 0.8);
+          font-size: 13px;
+          font-weight: 800;
+          color: #d97706;
           text-transform: uppercase;
-          letter-spacing: 0.3em;
+          letter-spacing: 0.2em;
           animation: stage-glow 2s ease-in-out infinite;
         }
 
         .growth-metrics {
           font-size: 10px;
-          color: rgba(255, 255, 255, 0.4);
-          margin-top: 8px;
+          color: #6b6560;
+          margin-top: 6px;
           display: flex;
           gap: 8px;
           justify-content: center;
-          font-weight: 700;
+          font-weight: 600;
         }
 
         .separator {
@@ -440,17 +440,17 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
 
         @keyframes brain-hover {
           0%, 100% { 
-            transform: rotateY(-8deg) rotateX(12deg) translateY(0); 
+            transform: rotateY(-5deg) rotateX(10deg) translateY(0); 
           }
           50% { 
-            transform: rotateY(12deg) rotateX(8deg) translateY(-30px); 
+            transform: rotateY(10deg) rotateX(5deg) translateY(-20px); 
           }
         }
 
         @keyframes draw-cortex {
           to { 
             stroke-dashoffset: 0; 
-            stroke: rgba(255, 255, 255, 0.2); 
+            stroke: rgba(26, 23, 20, 0.1); 
           }
         }
 
@@ -471,23 +471,23 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
 
         @keyframes stage-glow {
           0%, 100% { 
-            text-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+            text-shadow: 0 0 10px rgba(245, 200, 66, 0.2);
             opacity: 0.8;
           }
           50% { 
-            text-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
+            text-shadow: 0 0 20px rgba(245, 200, 66, 0.4);
             opacity: 1;
           }
         }
 
         /* Hover effects */
         .interactive-mode:hover .brain-viewport {
-          transform: scale(1.05);
+          transform: scale(1.02);
           animation-play-state: paused;
         }
 
         .interactive-mode:hover .cortex-outline {
-          stroke: rgba(255, 255, 255, 0.3);
+          stroke: rgba(26, 23, 20, 0.2);
         }
 
         .interactive-mode:hover .synapse-pulse {
@@ -497,7 +497,7 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
 
         /* Energy field animation */
         .energy-field {
-          animation: energy-rotate 20s linear infinite;
+          animation: energy-rotate 30s linear infinite;
         }
 
         @keyframes energy-rotate {
@@ -518,15 +518,15 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
 
           @keyframes brain-hover-mobile {
             0%, 100% { 
-              transform: rotateY(-5deg) rotateX(8deg) translateY(0); 
+              transform: rotateY(-3deg) rotateX(6deg) translateY(0); 
             }
             50% { 
-              transform: rotateY(8deg) rotateX(5deg) translateY(-15px); 
+              transform: rotateY(6deg) rotateX(3deg) translateY(-10px); 
             }
           }
 
           .growth-indicator {
-            bottom: -50px;
+            bottom: -40px;
           }
 
           .growth-stage {
@@ -544,8 +544,8 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
           position: absolute;
           inset: -20%;
           background: 
-            radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.03) 0%, transparent 50%),
-            radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.03) 0%, transparent 50%);
+            radial-gradient(circle at 20% 30%, rgba(245, 200, 66, 0.05) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(217, 119, 6, 0.05) 0%, transparent 50%);
           animation: ambient-shift 15s ease-in-out infinite alternate;
           pointer-events: none;
           z-index: -1;
@@ -562,7 +562,7 @@ const DigitalBrain: React.FC<DigitalBrainProps> = ({ progress, stats, isBackgrou
         }
 
         .interactive-mode:hover .brain-anatomy-svg {
-          filter: drop-shadow(0 0 60px rgba(79, 70, 229, 0.25));
+          filter: drop-shadow(0 0 60px rgba(217, 119, 6, 0.15));
         }
       `}</style>
     </div>

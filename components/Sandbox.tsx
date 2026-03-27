@@ -204,119 +204,123 @@ const Sandbox: React.FC<SandboxProps> = ({ personalization, onBack, onOpenAura }
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden" style={{ background: '#04050d', fontFamily: "'JetBrains Mono', 'Fira Code', monospace" }}>
-      {isLoading && <LoadingOverlay message="Neural Kernel Processing" subMessage="Aura is analyzing your logical architecture..." />}
+    <div className="relative min-h-screen overflow-hidden bg-[#faf8f5] text-[#1a1714]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      {isLoading && <LoadingOverlay message="Processing Logic" subMessage="Aura is analyzing your architectural decisions..." />}
       
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.6 }} />
-
-      <div
-        className="absolute inset-0 pointer-events-none z-10"
-        style={{
-          background: `linear-gradient(to bottom, transparent ${scanlinePos - 1}%, rgba(99,102,241,0.03) ${scanlinePos}%, transparent ${scanlinePos + 1}%)`,
-        }}
-      />
-
-      <div className="absolute inset-0 pointer-events-none z-10" style={{
-        background: 'radial-gradient(ellipse at center, transparent 50%, rgba(2,3,12,0.7) 100%)'
-      }} />
+      <div className="grid-bg absolute inset-0 pointer-events-none opacity-40" />
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700;800&family=Syne:wght@400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
         
         :root {
-          --indigo: #6366f1;
-          --cyan: #22d3ee;
-          --rose: #f43f5e;
-          --amber: #f59e0b;
-          --green: #10b981;
-          --bg: #04050d;
-          --surface: rgba(10,12,28,0.8);
-          --border: rgba(99,102,241,0.12);
+          --gold: #f5c842;
+          --gold-dark: #d97706;
+          --ink: #1a1714;
+          --paper: #faf8f5;
+          --border: #e8e3db;
+          --text-dim: #6b6560;
         }
 
-        .syne { font-family: 'Syne', sans-serif; }
-        .mono { font-family: 'JetBrains Mono', monospace; }
+        .font-serif { font-family: 'DM Serif Display', serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-        .glitch-text { animation: glitch 0.6s steps(2, end); }
-        @keyframes glitch {
-          0% { transform: translate(0); }
-          20% { transform: translate(-2px, 1px); }
-          40% { transform: translate(2px, -1px); }
-          60% { transform: translate(-1px, 2px); }
-          80% { transform: translate(1px, -2px); }
-          100% { transform: translate(0); }
+        .panel { background: #ffffff; border: 1px solid var(--border); border-radius: 24px; }
+        .paper-shadow { box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
+
+        .btn-gold {
+          background: var(--gold);
+          color: var(--ink);
+          transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(245, 200, 66, 0.2); }
+        .btn-gold:active { transform: translateY(0) scale(0.98); }
+
+        .code-textarea { 
+          background: #ffffff; 
+          color: #1a1714; 
+          caret-color: var(--gold-dark); 
+          line-height: 1.8; 
+          tab-size: 4; 
+          border: none;
+        }
+        .code-textarea::selection { background: rgba(245, 200, 66, 0.2); }
+
+        .tab-active { 
+          background: var(--gold); 
+          color: var(--ink) !important; 
+          box-shadow: 0 4px 12px rgba(245, 200, 66, 0.15);
         }
 
-        .panel { background: var(--surface); border: 1px solid var(--border); backdrop-filter: blur(20px); }
-        .panel-glow { box-shadow: 0 0 0 1px rgba(99,102,241,0.08), 0 4px 40px rgba(0,0,0,0.6); }
-
-        .btn-audit {
-          background: linear-gradient(135deg, #6366f1, #4f46e5);
-          transition: all 0.2s;
-          box-shadow: 0 4px 20px rgba(79, 70, 229, 0.2);
+        .challenge-card { 
+          cursor: pointer; 
+          border: 1px solid var(--border); 
+          background: #ffffff; 
+          transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1); 
         }
-        .btn-audit:hover { box-shadow: 0 0 30px rgba(99,102,241,0.5); transform: translateY(-1px); }
-        .btn-audit:active { transform: translateY(0) scale(0.98); }
+        .challenge-card:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.02); }
+        .challenge-card.active { border-color: var(--gold); background: #fdfcf9; }
 
-        .code-textarea { background: transparent; color: #a5b4fc; caret-color: #6366f1; line-height: 1.8; tab-size: 4; }
-        .code-textarea::selection { background: rgba(99,102,241,0.3); }
-
-        .tab-active { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.4) !important; color: #a5b4fc !important; }
-
-        .challenge-card { cursor: pointer; border: 1px solid rgba(99,102,241,0.1); background: rgba(10,12,28,0.6); transition: all 0.2s; }
-        .challenge-card:hover { border-color: rgba(99,102,241,0.35); transform: translateY(-2px); }
-        .challenge-card.active { border-color: rgba(99,102,241,0.6); background: rgba(99,102,241,0.08); }
-
-        .metric-box { background: rgba(10,12,28,0.8); border: 1px solid rgba(99,102,241,0.1); padding: 12px 16px; border-radius: 12px; }
-
-        .pulse-dot { animation: pulse 2s infinite; }
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
+        .metric-box { background: #faf8f5; border: 1px solid var(--border); padding: 16px; border-radius: 16px; }
 
         .line-number {
-          color: rgba(99,102,241,0.25);
+          color: #9a9088;
           user-select: none;
           text-align: right;
-          padding-right: 16px;
-          min-width: 44px;
+          padding-right: 20px;
+          min-width: 50px;
           font-size: 11px;
           line-height: 1.8;
+          font-family: 'JetBrains Mono', monospace;
         }
 
-        .sidebar-scroll::-webkit-scrollbar { width: 3px; }
-        .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.15); border-radius: 4px; }
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: #e8e3db; border-radius: 4px; }
+
+        .rail-text {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10px;
+          letter-spacing: 0.3em;
+          text-transform: uppercase;
+          writing-mode: vertical-rl;
+          transform: rotate(180deg);
+          color: #9a9088;
+        }
+
+        .oversized-number {
+          font-family: 'DM Serif Display', serif;
+          font-size: 120px;
+          line-height: 0.8;
+          color: #1a1714;
+          font-style: italic;
+        }
       `}</style>
 
       {/* Header */}
-      <header className="relative z-30 bg-[#04050d]/90 backdrop-blur-2xl border-b border-indigo-500/10">
-        <div className="max-w-screen-2xl mx-auto px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-6">
+      <header className="relative z-30 bg-white/80 backdrop-blur-xl border-b border-[#e8e3db]">
+        <div className="max-w-screen-2xl mx-auto px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-8">
             <button 
               onClick={onBack} 
-              aria-label="Return to Repository"
-              className="flex items-center gap-2 text-slate-500 hover:text-white transition-all group"
+              className="flex items-center gap-3 text-[#6b6560] hover:text-[#1a1714] transition-all group"
             >
-              <span className="group-hover:-translate-x-0.5 transition-transform text-sm">←</span>
-              <span className="mono text-[10px] uppercase tracking-widest">Repository</span>
+              <span className="group-hover:-translate-x-1 transition-transform">←</span>
+              <span className="font-mono text-[10px] uppercase tracking-widest font-bold">Repository</span>
             </button>
-            <div className="h-4 w-px bg-indigo-500/15" />
-            <span className="mono text-[10px] text-slate-600 tracking-[0.2em]">
-              PyQuest / <span className="text-indigo-400">Neural_Sandbox</span>
-            </span>
+            <div className="h-6 w-px bg-[#e8e3db]" />
+            <div className="flex flex-col">
+              <span className="font-mono text-[9px] text-[#9a9088] tracking-widest uppercase font-bold">PyQuest // Module</span>
+              <span className="font-serif text-xl italic text-[#1a1714]">Neural Sandbox</span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="pulse-dot w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span className="mono text-[10px] text-emerald-500/70 tracking-widest">LIVE_KERNEL</span>
+          <div className="flex items-center gap-6">
+            <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-[#faf8f5] border border-[#e8e3db] rounded-full">
+              <div className="w-2 h-2 rounded-full bg-[#16a34a] animate-pulse" />
+              <span className="font-mono text-[10px] text-[#1a1714] tracking-widest font-bold">KERNEL_ACTIVE</span>
             </div>
-            <div className="bg-indigo-500/10 border border-indigo-500/20 rounded px-3 py-1 text-[10px] text-slate-500 mono">{lineCount} ln</div>
             <button 
               onClick={onOpenAura} 
-              aria-label="Consult Aura AI"
-              className="bg-indigo-600/15 border border-indigo-500/30 text-indigo-300 px-5 py-2 rounded-xl mono text-[10px] tracking-widest hover:bg-indigo-600/25 transition-all"
+              className="bg-[#1a1714] text-white px-6 py-2.5 rounded-full font-mono text-[10px] tracking-widest font-bold hover:bg-[#333] transition-all shadow-lg"
             >
               ✦ CONSULT AURA
             </button>
@@ -325,30 +329,35 @@ const Sandbox: React.FC<SandboxProps> = ({ personalization, onBack, onOpenAura }
       </header>
 
       {/* Main Layout */}
-      <main className="relative z-20 max-w-screen-2xl mx-auto p-6 grid gap-5" style={{ gridTemplateColumns: '1fr 460px', minHeight: 'calc(100vh - 64px)' }}>
+      <main className="relative z-20 max-w-screen-2xl mx-auto p-8 grid gap-8" style={{ gridTemplateColumns: '1fr 480px', minHeight: 'calc(100vh - 80px)' }}>
+        
+        {/* Rail Text */}
+        <div className="absolute left-6 top-1/2 -translate-y-1/2 rail-text opacity-20 hidden 2xl:block">
+          NEURAL_SANDBOX_V1.0 // EXPERIMENTAL_BUILD
+        </div>
 
         {/* LEFT: Code Editor */}
-        <div className="flex flex-col gap-4 min-h-0">
-          <div className="panel panel-glow rounded-2xl flex flex-col overflow-hidden flex-1 min-h-0">
+        <div className="flex flex-col gap-6 min-h-0 relative">
+          <div className="panel paper-shadow flex flex-col overflow-hidden flex-1 min-h-0 bg-white">
             {/* Toolbar */}
-            <div className="flex items-center justify-between px-5 py-3 shrink-0 border-b border-indigo-500/10 bg-[#060814]/80">
-              <div className="flex items-center gap-3">
-                <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500/60" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500/60" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/60" />
+            <div className="flex items-center justify-between px-6 py-4 shrink-0 border-b border-[#e8e3db] bg-[#faf8f5]">
+              <div className="flex items-center gap-4">
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-[#e8e3db]" />
+                  <div className="w-3 h-3 rounded-full bg-[#e8e3db]" />
+                  <div className="w-3 h-3 rounded-full bg-[#e8e3db]" />
                 </div>
-                <div className="h-3 w-px bg-indigo-500/15 mx-2" />
-                <span className="mono text-[10px] text-indigo-400/60 tracking-widest">sandbox_kernel.py</span>
+                <div className="h-4 w-px bg-[#e8e3db] mx-2" />
+                <span className="font-mono text-[10px] text-[#d97706] tracking-widest font-bold italic">sandbox_kernel.py</span>
               </div>
-              <div className="mono text-[9px] text-slate-700 tracking-widest">Python 3.12 · UTF-8</div>
+              <div className="font-mono text-[10px] text-[#9a9088] tracking-widest">{lineCount} lines · Python 3.12</div>
             </div>
 
             {/* Editor Container */}
             <div className="flex-1 flex overflow-hidden">
               <div 
                 ref={lineNumbersRef}
-                className="flex flex-col pt-5 pb-5 shrink-0 overflow-hidden bg-black/30 border-r border-indigo-500/5 select-none"
+                className="flex flex-col pt-6 pb-6 shrink-0 overflow-hidden bg-[#faf8f5] border-r border-[#e8e3db] select-none"
               >
                 {code.split('\n').map((_, i) => (
                   <div key={i} className="line-number">{i + 1}</div>
@@ -360,19 +369,18 @@ const Sandbox: React.FC<SandboxProps> = ({ personalization, onBack, onOpenAura }
                 onChange={e => setCode(e.target.value)}
                 onScroll={handleScroll}
                 spellCheck={false}
-                aria-label="Python Code Editor"
-                className={`code-textarea flex-1 p-5 resize-none outline-none text-sm font-mono ${glitchActive ? 'glitch-text' : ''}`}
+                className="code-textarea flex-1 p-6 resize-none outline-none text-[15px] font-mono"
               />
             </div>
 
             {/* Footer */}
-            <div className="px-5 py-4 shrink-0 flex items-center justify-between border-t border-indigo-500/10 bg-[#060814]/60">
-              <div className="mono text-[10px] text-slate-700">
-                {activeChallengeId ? 'CHALLENGE_ACTIVE' : activeProjectId ? 'PROJECT_SCAFFOLD' : 'FREE_EXPLORATION'}
+            <div className="px-8 py-6 shrink-0 flex items-center justify-between border-t border-[#e8e3db] bg-[#faf8f5]">
+              <div className="font-mono text-[10px] text-[#9a9088] font-bold tracking-widest uppercase">
+                {activeChallengeId ? '● Challenge Active' : activeProjectId ? '● Project Scaffold' : '○ Free Exploration'}
               </div>
               <button
                 onClick={handleRequestAudit}
-                className="btn-audit flex items-center gap-3 px-10 py-3.5 rounded-xl text-white mono font-bold text-xs tracking-[0.2em]"
+                className="btn-gold flex items-center gap-3 px-10 py-4 rounded-2xl font-mono font-bold text-xs tracking-[0.2em] shadow-md"
               >
                 ⬡ AUDIT KERNEL
               </button>
@@ -380,21 +388,21 @@ const Sandbox: React.FC<SandboxProps> = ({ personalization, onBack, onOpenAura }
           </div>
 
           {/* Dataset Synthesizer */}
-          <div className="panel panel-glow rounded-2xl p-5 shrink-0">
+          <div className="panel paper-shadow p-6 shrink-0 bg-white">
             <div className="flex items-center gap-3 mb-4">
-              <span className="mono text-[10px] text-cyan-400 tracking-widest">⬡ SYNTHETIC_GENERATOR</span>
+              <span className="font-mono text-[10px] text-[#d97706] tracking-widest font-bold uppercase">⬡ Synthetic Generator</span>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               <input
                 value={datasetPrompt}
                 onChange={e => setDatasetPrompt(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleSynthesizeDataset()}
-                placeholder="Describe: Normal distribution, 500 samples, mean=0, std=1..."
-                className="flex-1 rounded-xl px-5 py-3.5 outline-none bg-black/80 border border-indigo-500/20 text-[#c7d2fe] mono text-xs focus:border-cyan-500/40 transition-all"
+                placeholder="Describe a dataset (e.g., normal distribution, 500 samples)..."
+                className="flex-1 rounded-2xl px-6 py-4 outline-none bg-[#faf8f5] border border-[#e8e3db] text-[#1a1714] font-mono text-xs focus:border-[#f5c842] transition-all"
               />
               <button
                 onClick={handleSynthesizeDataset}
-                className="px-8 rounded-xl mono font-bold text-[10px] tracking-widest transition-all bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 active:scale-95"
+                className="px-8 rounded-2xl font-mono font-bold text-[10px] tracking-widest transition-all bg-[#1a1714] text-white hover:bg-[#333] active:scale-95 shadow-lg"
               >
                 SYNTHESIZE →
               </button>
@@ -403,110 +411,116 @@ const Sandbox: React.FC<SandboxProps> = ({ personalization, onBack, onOpenAura }
         </div>
 
         {/* RIGHT: Sidebar */}
-        <div className="flex flex-col gap-4 min-h-0">
+        <div className="flex flex-col gap-6 min-h-0">
           {/* Tabs */}
-          <div className="panel panel-glow rounded-2xl p-1.5 grid grid-cols-4 gap-1">
+          <div className="panel paper-shadow p-2 grid grid-cols-4 gap-1 bg-white">
             {(['Audit', 'Data', 'Challenges', 'Projects'] as const).map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`py-2.5 rounded-xl mono text-[9px] tracking-widest transition-all ${activeTab === tab ? 'tab-active' : 'text-slate-600 hover:text-slate-400'}`}
+                className={`py-3 rounded-xl font-mono text-[9px] font-bold tracking-widest transition-all ${activeTab === tab ? 'tab-active' : 'text-[#9a9088] hover:text-[#1a1714]'}`}
               >
                 {tab.toUpperCase()}
               </button>
             ))}
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto sidebar-scroll space-y-4">
+          <div className="flex-1 min-h-0 overflow-y-auto sidebar-scroll space-y-6 pr-2">
             {activeTab === 'Audit' && (
-              <div className="fade-in space-y-4">
+              <div className="space-y-6">
                 {audit ? (
                   <>
-                    <div className="panel panel-glow rounded-2xl p-8 space-y-6">
-                      <div className="flex items-center justify-between">
+                    <div className="panel paper-shadow p-10 space-y-8 relative overflow-hidden group">
+                      <div className="oversized-number absolute -right-6 -bottom-6 opacity-5 italic">88</div>
+                      <div className="flex items-center justify-between relative z-10">
                         <div>
-                          <p className="mono text-[9px] text-indigo-400/60 tracking-widest mb-2">EFFICIENCY_SCORE</p>
-                          <div className="syne font-black text-6xl text-white leading-none">
-                            {audit.efficiencyScore}<span className="text-3xl text-indigo-500">%</span>
+                          <p className="font-mono text-[10px] text-[#d97706] tracking-widest font-bold mb-3 uppercase">Efficiency Score</p>
+                          <div className="font-serif italic text-7xl text-[#1a1714] leading-none">
+                            {audit.efficiencyScore}<span className="text-3xl text-[#d97706]">%</span>
                           </div>
                         </div>
-                        <svg width="80" height="80" viewBox="0 0 90 90">
-                          <circle cx="45" cy="45" r="36" fill="none" stroke="rgba(99,102,241,0.1)" strokeWidth="6" />
-                          <circle
-                            cx="45" cy="45" r="36"
-                            fill="none"
-                            stroke={audit.efficiencyScore >= 80 ? '#10b981' : audit.efficiencyScore >= 50 ? '#f59e0b' : '#f43f5e'}
-                            strokeWidth="6"
-                            strokeLinecap="round"
-                            strokeDasharray="226"
-                            strokeDashoffset={226 - (226 * audit.efficiencyScore) / 100}
-                            transform="rotate(-90 45 45)"
-                            className="transition-all duration-1000"
-                          />
-                        </svg>
+                        <div className="relative">
+                          <svg width="100" height="100" viewBox="0 0 90 90">
+                            <circle cx="45" cy="45" r="38" fill="none" stroke="#e8e3db" strokeWidth="4" />
+                            <circle
+                              cx="45" cy="45" r="38"
+                              fill="none"
+                              stroke="#f5c842"
+                              strokeWidth="4"
+                              strokeLinecap="round"
+                              strokeDasharray="238"
+                              strokeDashoffset={238 - (238 * audit.efficiencyScore) / 100}
+                              transform="rotate(-90 45 45)"
+                              className="transition-all duration-1000"
+                            />
+                          </svg>
+                          <div className="absolute inset-0 flex items-center justify-center font-serif italic text-xl">
+                            {audit.efficiencyScore >= 80 ? 'A+' : audit.efficiencyScore >= 60 ? 'B' : 'C'}
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-4 relative z-10">
                         <div className="metric-box">
-                          <p className="mono text-[8px] text-slate-500 uppercase tracking-widest">Big-O</p>
-                          <p className="mono font-bold mt-1 text-indigo-300">{audit.bigO}</p>
+                          <p className="font-mono text-[9px] text-[#9a9088] uppercase tracking-widest font-bold">Complexity</p>
+                          <p className="font-serif italic text-2xl mt-1 text-[#1a1714]">{audit.bigO}</p>
                         </div>
                         <div className="metric-box">
-                          <p className="mono text-[8px] text-slate-500 uppercase tracking-widest">Integrity</p>
-                          <p className={`mono font-bold mt-1 ${audit.isProductionReady ? 'text-emerald-400' : 'text-rose-400'}`}>
-                            {audit.isProductionReady ? 'SOUND' : 'ERRATIC'}
+                          <p className="font-mono text-[9px] text-[#9a9088] uppercase tracking-widest font-bold">Integrity</p>
+                          <p className={`font-serif italic text-2xl mt-1 ${audit.isProductionReady ? 'text-[#16a34a]' : 'text-[#f43f5e]'}`}>
+                            {audit.isProductionReady ? 'Refined' : 'Erratic'}
                           </p>
                         </div>
                       </div>
                     </div>
 
-                    <div className="panel panel-glow rounded-2xl p-6 space-y-3">
-                      <p className="mono text-[9px] text-indigo-400/50 tracking-widest uppercase">Structural Review</p>
-                      <p className="syne text-slate-400 text-sm leading-relaxed">{audit.architecturalReview}</p>
+                    <div className="panel paper-shadow p-8 space-y-4">
+                      <p className="font-mono text-[10px] text-[#d97706] tracking-widest uppercase font-bold">Structural Review</p>
+                      <p className="font-serif italic text-lg text-[#1a1714] leading-relaxed opacity-80">{audit.architecturalReview}</p>
                     </div>
 
-                    <div className="panel panel-glow rounded-2xl p-6 space-y-4">
-                      <p className="mono text-[9px] text-indigo-400/50 tracking-widest uppercase">Optimizations</p>
+                    <div className="space-y-4">
+                      <p className="font-mono text-[10px] text-[#9a9088] tracking-widest uppercase font-bold px-2">Optimizations</p>
                       {audit.suggestedImprovements.map((imp, idx) => (
-                        <div key={idx} className="flex gap-4 p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
-                          <span className="mono font-bold text-indigo-500 text-xs">#{idx + 1}</span>
-                          <p className="syne text-xs text-slate-400 leading-normal">{imp}</p>
+                        <div key={idx} className="flex gap-5 p-6 rounded-3xl bg-white border border-[#e8e3db] paper-shadow">
+                          <span className="font-serif italic font-bold text-[#f5c842] text-2xl">0{idx + 1}</span>
+                          <p className="text-sm text-[#6b6560] leading-relaxed font-medium">{imp}</p>
                         </div>
                       ))}
                     </div>
 
                     {audit.visualizationData && (
-                      <div className="panel panel-glow rounded-2xl h-[280px] overflow-hidden">
+                      <div className="panel paper-shadow h-[320px] overflow-hidden bg-white">
                         <Visualizer data={audit.visualizationData} />
                       </div>
                     )}
                   </>
                 ) : (
-                  <div className="panel rounded-2xl p-16 text-center space-y-6">
-                    <div className="text-5xl opacity-10">⬡</div>
-                    <p className="mono text-[10px] text-slate-600 tracking-widest uppercase">Aura is Idle. Audit kernel for analysis.</p>
+                  <div className="panel paper-shadow p-20 text-center space-y-6 bg-white">
+                    <div className="font-serif italic text-6xl opacity-10">⬡</div>
+                    <p className="font-mono text-[10px] text-[#9a9088] tracking-widest uppercase font-bold">Aura is Idle. <br /> Audit kernel for analysis.</p>
                   </div>
                 )}
               </div>
             )}
 
             {activeTab === 'Data' && (
-              <div className="fade-in space-y-4">
+              <div className="space-y-6">
                 {dataset ? (
-                  <div className="panel panel-glow rounded-2xl p-6 space-y-5">
+                  <div className="panel paper-shadow p-8 space-y-6 bg-white">
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="mono text-[9px] text-cyan-400/60 uppercase">Artifact Synthesized</p>
-                        <h4 className="syne font-bold text-xl text-white mt-1">{dataset.name}</h4>
+                        <p className="font-mono text-[10px] text-[#d97706] uppercase tracking-widest font-bold">Artifact Synthesized</p>
+                        <h4 className="font-serif italic text-3xl text-[#1a1714] mt-2">{dataset.name}</h4>
                       </div>
                       <button 
                         onClick={() => copyToClipboard(dataset.data)}
-                        className="text-[10px] mono text-slate-500 hover:text-white"
+                        className="px-4 py-2 rounded-full border border-[#e8e3db] font-mono text-[10px] text-[#6b6560] hover:text-[#1a1714] hover:border-[#f5c842] transition-all"
                       >
-                        [COPY]
+                        COPY
                       </button>
                     </div>
-                    <div className="bg-black/90 border border-cyan-500/10 p-5 rounded-xl font-mono text-[10px] text-cyan-500/40 leading-loose overflow-x-auto max-h-[400px]">
+                    <div className="bg-[#faf8f5] border border-[#e8e3db] p-6 rounded-2xl font-mono text-[11px] text-[#1a1714] leading-loose overflow-x-auto max-h-[400px] shadow-inner">
                       {dataset.data}
                     </div>
                     <button
@@ -518,55 +532,61 @@ const Sandbox: React.FC<SandboxProps> = ({ personalization, onBack, onOpenAura }
                         a.download = `${dataset.name.toLowerCase().replace(/\s/g, '_')}.${dataset.format}`;
                         a.click();
                       }}
-                      className="w-full py-3.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 mono text-[10px] tracking-widest hover:bg-cyan-500/15"
+                      className="w-full py-4 rounded-2xl bg-[#1a1714] text-white font-mono font-bold text-[10px] tracking-widest hover:bg-[#333] transition-all shadow-lg"
                     >
                       DOWNLOAD_MANIFEST (.{dataset.format.toUpperCase()})
                     </button>
                   </div>
                 ) : (
-                  <div className="panel rounded-2xl p-16 text-center space-y-6">
-                    <div className="text-5xl opacity-10">◈</div>
-                    <p className="mono text-[10px] text-slate-600 tracking-widest uppercase">Describe a dataset below to begin.</p>
+                  <div className="panel paper-shadow p-20 text-center space-y-6 bg-white">
+                    <div className="font-serif italic text-6xl opacity-10">◈</div>
+                    <p className="font-mono text-[10px] text-[#9a9088] tracking-widest uppercase font-bold">Describe a dataset <br /> to begin synthesis.</p>
                   </div>
                 )}
               </div>
             )}
 
             {activeTab === 'Challenges' && (
-              <div className="fade-in space-y-3">
+              <div className="space-y-4">
                 {CHALLENGES.map(ch => (
                   <div
                     key={ch.id}
-                    className={`challenge-card rounded-xl p-5 ${activeChallengeId === ch.id ? 'active' : ''}`}
+                    className={`challenge-card rounded-3xl p-6 ${activeChallengeId === ch.id ? 'active' : ''}`}
                     onClick={() => loadChallenge(ch)}
                   >
-                    <div className="flex justify-between items-start mb-3">
-                      <span className="mono font-bold text-sm text-white">{ch.label}</span>
-                      <span className="mono text-[8px] px-2 py-0.5 rounded-md" style={{ color: DIFFICULTY_COLORS[ch.difficulty], background: `${DIFFICULTY_COLORS[ch.difficulty]}15` }}>
+                    <div className="flex justify-between items-start mb-4">
+                      <span className="font-serif italic text-xl text-[#1a1714]">{ch.label}</span>
+                      <span className="font-mono text-[9px] font-bold px-3 py-1 rounded-full border" style={{ borderColor: DIFFICULTY_COLORS[ch.difficulty], color: DIFFICULTY_COLORS[ch.difficulty] }}>
                         {ch.difficulty.toUpperCase()}
                       </span>
                     </div>
-                    <p className="mono text-[10px] text-slate-500 tracking-widest">
-                      {activeChallengeId === ch.id ? '● ACTIVE_DRILL' : '○ LOAD_PROTO'}
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <p className="font-mono text-[10px] text-[#9a9088] tracking-widest font-bold uppercase">
+                        {activeChallengeId === ch.id ? '● Active Drill' : '○ Load Proto'}
+                      </p>
+                      <span className="text-[#e8e3db] group-hover:text-[#f5c842] transition-colors">→</span>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
 
             {activeTab === 'Projects' && (
-              <div className="fade-in space-y-3">
+              <div className="space-y-4">
                 {MINI_PROJECTS.map(proj => (
                   <div 
                     key={proj.id} 
-                    className={`challenge-card rounded-xl p-5 ${activeProjectId === proj.id ? 'active' : ''}`}
+                    className={`challenge-card rounded-3xl p-6 ${activeProjectId === proj.id ? 'active' : ''}`}
                     onClick={() => loadProject(proj)}
                   >
-                    <div className="flex items-center gap-4 mb-2">
-                      <span className="text-2xl">{proj.icon}</span>
-                      <span className="syne font-bold text-white">{proj.label}</span>
+                    <div className="flex items-center gap-5 mb-3">
+                      <span className="text-3xl filter grayscale group-hover:grayscale-0 transition-all">{proj.icon}</span>
+                      <span className="font-serif italic text-2xl text-[#1a1714]">{proj.label}</span>
                     </div>
-                    <p className="mono text-[9px] text-slate-500 tracking-widest">SCAFFOLD_READY</p>
+                    <div className="flex items-center justify-between">
+                      <p className="font-mono text-[10px] text-[#9a9088] tracking-widest font-bold uppercase italic">Scaffold Ready</p>
+                      <span className="text-[#e8e3db] group-hover:text-[#f5c842] transition-colors">→</span>
+                    </div>
                   </div>
                 ))}
               </div>
