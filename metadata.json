@@ -1,8 +1,0 @@
-{
-  "name": "PyQuest",
-  "description": "The elite training ground for Machine Learning Architects. Master applied Python engineering through professional-grade challenges and neural audits.",
-  "requestFramePermissions": [
-    "camera",
-    "microphone"
-  ]
-}
